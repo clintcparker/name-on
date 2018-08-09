@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <None Update="Adjectives.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Nouns.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
