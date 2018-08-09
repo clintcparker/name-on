@@ -8,7 +8,6 @@ namespace name_on_cli
     {
         static void Main(string[] args)
         {
-            var d = System.IO.File.ReadLines("Adjectives.txt");
             var n = new Namer();
             Console.WriteLine(n.Gen());
         }

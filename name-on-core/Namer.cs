@@ -15,8 +15,9 @@ namespace name_on_core
         
         static Namer()
         {
-            Adjectives = File.ReadLines("Adjectives.txt").ToList();
-            Nouns = File.ReadLines("Nouns.txt").ToList();
+            var d = new Dicts();
+            Adjectives = d.Adjectives;
+            Nouns = d.Nouns;
         }
 
         public string Gen()
