@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\name-on-core\name-on-core.csproj" />
+    <ProjectReference Include="..\name-on-core\name-on-core.csproj"  />
   </ItemGroup>
 
   <PropertyGroup>
