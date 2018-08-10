@@ -11,8 +11,6 @@ namespace name_on_core
 
         private string lastReturn;
 
-
-        
         static Namer()
         {
             var d = new Dicts();
