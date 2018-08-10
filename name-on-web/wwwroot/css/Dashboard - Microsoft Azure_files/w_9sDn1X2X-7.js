@@ -1,0 +1,1 @@
+define("Fx/Composition/BladeBase",["require","exports","Fx/Composition/ViewModelBase"],(function(n,t,i){"use strict";var r;return (function(n){var t;(function(n){n.SettingsScope=i.Configurable.SettingsScope})(t=n.Configurable||(n.Configurable={}))})(r||(r={})),r}))

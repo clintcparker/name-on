@@ -1,0 +1,1 @@
+define("Shared/Logging",["require","exports","o"],(function(n,t,i){"use strict";function r(n,t){if(console){var i="[AIError]";i+="area: "+t+"; ";i+=n&&typeof n!="string"?n.responseText:n;console.warn(i)}}i.defineProperty(t,"__esModule",{value:!0});t.errorConsole=r}))

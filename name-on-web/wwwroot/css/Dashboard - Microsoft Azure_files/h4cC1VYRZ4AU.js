@@ -1,0 +1,1 @@
+define("HubsExtension/BrowseGrid2/BrowseGrid2Area",["require","exports","o"],(function(n,t,i){"use strict";i.defineProperty(t,"__esModule",{value:!0});var r=(function(){function n(){}return n})();t.DataContext=r}))

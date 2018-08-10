@@ -1,0 +1,1 @@
+define("AdminUnit/AdminUnitConstants",["require","exports","o"],(function(n,t,i){"use strict";i.defineProperty(t,"__esModule",{value:!0});t.AdminUnitConstants={AdminUnitManagement:{GridColumnDisplayName:"displayName",GridColumnDescription:"description"},AdminUnitMemberType:{users:"users",groups:"groups"},AdminUnitDefaultPageSize:25}}))
