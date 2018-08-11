@@ -21,7 +21,7 @@ Name-On consists of 4 components:
 
 ## API
 
-That's right there's an API. You never know when you'll need to `curl` this beacuse because you haven't installed the CLI yet. 
+That's right there's an API. You never know when you'll need to `curl` this because you haven't installed the CLI yet. 
 
 `curl https://name-on.site/api/name`
 
