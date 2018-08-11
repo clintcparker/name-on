@@ -1,1 +1,0 @@
-define("HubsExtension/Help/HelpArea",["require","exports"],(function(){"use strict";var n;return (function(n){var t=(function(){function n(){}return n.prototype.dispose=function(){this._disposable&&(this._disposable.dispose(),this._disposable=undefined)},n})();n.DataContext=t})(n||(n={})),n}))

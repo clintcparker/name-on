@@ -1,1 +1,0 @@
-define("Shared/Flights",["require","exports","o"],(function(n,t,i){"use strict";i.defineProperty(t,"__esModule",{value:!0});var r=(function(){function n(){}return n.getFlights=function(){return n._flights},n.setFlights=function(t){n._flights=t},n})();r._flights=null;t.Flights=r}))
