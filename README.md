@@ -1,3 +1,4 @@
+
 # Name-On
 ![Release](https://clintcparker.vsrm.visualstudio.com/_apis/public/Release/badge/5eb5c9e0-ca41-4637-a6a1-1a4c8deda67b/1/1)
 
@@ -16,15 +17,22 @@ Name-On consists of 4 components:
 
 1. name-on-core: A shared library with the core behavior logic
 1. name-on-unit-test: A unit testing project for the core library
-1. name-on-cli: A command line wrapper for the core library
-1. name-on-web: An ASP.NET Core web app surfacing the core behaviors
+1. [name-on-cli](#cli): A command line wrapper for the core library
+1. [name-on-web](#api): An ASP.NET Core web app surfacing the core behaviors
 
-## API
+### CLI
+
+I'm a sucker for CLIs. But I'm not clear on how to deploy this one. For now, get the source, run `dotnet publish`, and then symlink from the new publish directory to someplace in your $PATH.
+
+### API
 
 That's right there's an API. You never know when you'll need to `curl` this because you haven't installed the CLI yet. 
 
 `curl https://name-on.site/api/name`
 
-## CLI
-
-I'm a sucker for CLIs. But I'm not clear on how to deploy this one. For now, get the source, run `dotnet publish`, and then symlink from the new publish directory to someplace in your $PATH.
+## Roadmap
+1. Add a button to copy to clipboard
+1. CD for publishing CLI to various sources
+    1. Homebrew
+    1. Chocolatey
+    1. APT
