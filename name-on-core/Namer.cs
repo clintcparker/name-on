@@ -9,48 +9,51 @@ namespace name_on_core
     {
         private static Namer Instance = new Namer();
 
-        private string lastReturn;
+        private string _lastReturn;
+
+        // Make sure 
+        private static Random _random;
 
         static Namer()
         {
             var d = new Dicts();
             Adjectives = d.Adjectives;
             Nouns = d.Nouns;
+            _random = new Random();
         }
 
         public string Gen()
         {
             // var retVal = "Test-one-123";
             var retVal = Instance.GenRandomString();
-            while (lastReturn == retVal)
+            while (_lastReturn == retVal)
             {
                 retVal = Instance.GenRandomString();
             }
-            lastReturn = retVal;
-            return lastReturn;
+            _lastReturn = retVal;
+            return _lastReturn;
         }
-
+         
+        
         private string GenRandomString()
         {
             return $"{GenRandomAdjective()}-{GenRandomNoun()}-{GenRandomThreeDigits()}";
         }
 
+        // TODO: keep the Random Instance as as private 
         private int GenRandomThreeDigits()
         {
-            var r = new Random();
-            return r.Next(0,999);
+            return _random.Next(0,999);
         }
 
         private string GenRandomNoun()
         {
-            var r = new Random();
-            return Nouns[r.Next(0,Nouns.Count-1)];
+            return Nouns[_random.Next(0,Nouns.Count-1)];
         }
 
         private string GenRandomAdjective()
         {
-            var r = new Random();
-            return Adjectives[r.Next(0,Adjectives.Count-1)];
+            return Adjectives[_random.Next(0,Adjectives.Count-1)];
         }
 
         private static List<string> Adjectives;
