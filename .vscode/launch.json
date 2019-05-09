@@ -9,7 +9,7 @@
            "type": "coreclr",
            "request": "launch",
            "preLaunchTask": "build",
-           "program": "${workspaceFolder}/name-on-web/bin/Debug/netcoreapp2.1/name-on-web.dll",
+           "program": "${workspaceFolder}/name-on-web/bin/Debug/netcoreapp2.1/publish/name-on-web.dll",
            "args": [],
            "cwd": "${workspaceFolder}",
            "stopAtEntry": false,
