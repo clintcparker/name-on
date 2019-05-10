@@ -2,6 +2,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using name_on_core;
+using System.Linq;
+using System.Reflection;
+using System;
 
 namespace name_on_unit_tests
 {
@@ -42,5 +46,31 @@ namespace name_on_unit_tests
                 }
             }
         }
+
+        [TestMethod]
+        public void NoWeirdCharactersInDictionaries()
+        {
+            var dicts = new name_on_core.Dicts();
+            var pattern = @"\w+";
+            var r = new Regex(pattern);
+            bool adjectivesAreGood = dicts.Adjectives.TrueForAll(r.IsMatch);
+            bool nounsAreGood = dicts.Nouns.TrueForAll(r.IsMatch);
+            Assert.IsTrue(adjectivesAreGood&&nounsAreGood, listBadVals(dicts,r));
+        }
+
+        private string listBadVals(Dicts dicts, Regex r)
+        {
+            var allWords = new List<string>();
+            var type1 = dicts.GetType();
+            var allFields = type1.GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+            var fields = allFields.Where(fi => fi.FieldType == typeof(List<string>));
+            foreach (var field in fields){
+                List<string> list = field.GetValue(dicts) as List<string>;
+                allWords.AddRange(list);
+            }
+            var s1 = string.Join(",", allWords.FindAll(x=>!r.IsMatch(x)));
+            return $" BAD VALUES: \n\n\n {s1}  \n\n\n\n";
+        }
+
     }
 }
