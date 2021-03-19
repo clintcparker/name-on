@@ -55,10 +55,10 @@ namespace name_on_unit_tests
             var r = new Regex(pattern);
             bool adjectivesAreGood = dicts.Adjectives.TrueForAll(r.IsMatch);
             bool nounsAreGood = dicts.Nouns.TrueForAll(r.IsMatch);
-            Assert.IsTrue(adjectivesAreGood&&nounsAreGood, listBadVals(dicts,r));
+            Assert.IsTrue(adjectivesAreGood&&nounsAreGood, listBadValues(dicts,r));
         }
 
-        private string listBadVals(Dicts dicts, Regex r)
+        private string listBadValues(Dicts dicts, Regex r)
         {
             var allWords = new List<string>();
             var type1 = dicts.GetType();
