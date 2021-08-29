@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "name-on-web", "name-on-web\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "name-on-cli", "name-on-cli\name-on-cli.csproj", "{C22934D1-2F53-4AB3-8A66-28E02B36C070}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "azfn", "azfn\azfn.csproj", "{00495E61-DA27-4B97-9AB7-4DE7A916CADB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,17 @@ Global
 		{C22934D1-2F53-4AB3-8A66-28E02B36C070}.Release|x64.Build.0 = Release|Any CPU
 		{C22934D1-2F53-4AB3-8A66-28E02B36C070}.Release|x86.ActiveCfg = Release|Any CPU
 		{C22934D1-2F53-4AB3-8A66-28E02B36C070}.Release|x86.Build.0 = Release|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Debug|x64.Build.0 = Debug|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Debug|x86.Build.0 = Debug|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Release|x64.ActiveCfg = Release|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Release|x64.Build.0 = Release|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Release|x86.ActiveCfg = Release|Any CPU
+		{00495E61-DA27-4B97-9AB7-4DE7A916CADB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
