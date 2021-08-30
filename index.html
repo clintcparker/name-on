@@ -82,9 +82,6 @@ footer {
   display: none;
 }
 
-.copyBtn {
-  display: none;
-}
     </style>
     
     <!-- <link rel="stylesheet" href="/css/starter-template.css" />
@@ -98,11 +95,21 @@ footer {
 <main role="main" class="container">
 
       <div class="starter-template" id="uniqueName">
-        <div class="spinner-grow" role="status"><span class="sr-only">Loading...</span></div> 
-        <div class="spinner-grow" role="status"></div> 
-        <div class="spinner-grow" role="status"></div>
+        <h1 id="spinners">
+          <div class="spinner-grow" role="status"><span class="sr-only">Loading...</span></div> 
+          <div class="spinner-grow" role="status"></div> 
+          <div class="spinner-grow" role="status"></div>
+        </h1>
+        
         <h1 id="h1A"></h1>
-        <button type="button" class="btn" id="copyBtn" data-clipboard-action="copy" data-clipboard-target="#h1A"> 
+        <hr/>
+        <button class="btn btn-primary" onclick="getName();">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+          <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+        </svg>
+        </button>
+        <button type="button" class="btn btn-secondary" id="copyBtn" data-clipboard-action="copy" data-clipboard-target="#h1A"> 
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
             <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
             <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
@@ -114,7 +121,7 @@ footer {
 
 
 <script>
-  new ClipboardJS('.btn');
+  new ClipboardJS('#copyBtn');
   function getName() {
     showSpinner();
     var xhr = new XMLHttpRequest();
@@ -123,24 +130,22 @@ footer {
     xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
 
     xhr.onload = function () {
-      document.getElementsByClassName("spinner-grow")[0].style.display = "none";
-      document.getElementsByClassName("spinner-grow")[1].style.display = "none";
-      document.getElementsByClassName("spinner-grow")[2].style.display = "none";
+      document.getElementById("spinners").style.display = "none";
       document.getElementById('h1A').innerText = this.responseText;
       document.getElementById('h1A').style.display = 'block';
-      document.getElementById('copyBtn').style.display = 'inline-block';
+      document.getElementsByClassName('btn')[0].disabled = false;
+      document.getElementsByClassName('btn')[1].disabled = false;
     };
 
     xhr.send(null);
   }
   
   function showSpinner() {
-      document.getElementsByClassName("spinner-grow")[0].style.display = "inline-block";
-      document.getElementsByClassName("spinner-grow")[1].style.display = "inline-block";
-      document.getElementsByClassName("spinner-grow")[2].style.display = "inline-block";
+      document.getElementById("spinners").style.display = "inline-block";
       document.getElementById('h1A').innerText = this.responseText;
       document.getElementById('h1A').style.display = 'none';
-      document.getElementById('copyBtn').style.display = 'none';
+      document.getElementsByClassName('btn')[0].disabled = true;
+      document.getElementsByClassName('btn')[1].disabled = true;
   }
 
   getName();
