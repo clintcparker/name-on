@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Name-On</title>
 
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <!-- <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.css" /> -->
@@ -74,7 +78,13 @@ footer {
   padding-left: 20px;
 }
 
+#h1A  {
+  display: none;
+}
 
+.copyBtn {
+  display: none;
+}
     </style>
     
     <!-- <link rel="stylesheet" href="/css/starter-template.css" />
@@ -87,32 +97,56 @@ footer {
 
 <main role="main" class="container">
 
-      <div class="starter-template">
+      <div class="starter-template" id="uniqueName">
+        <div class="spinner-grow" role="status"><span class="sr-only">Loading...</span></div> 
+        <div class="spinner-grow" role="status"></div> 
+        <div class="spinner-grow" role="status"></div>
         <h1 id="h1A"></h1>
+        <button type="button" class="btn" id="copyBtn" data-clipboard-action="copy" data-clipboard-target="#h1A"> 
+          copy to clipboard 
+        </button>
     </div>
 
     </main><!-- /.container -->
 
 
 <script>
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'https://wild-mascot-730.azurewebsites.net/api/generate', true);
-  //set cors headers
-  xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+  new ClipboardJS('.btn');
+  function getName() {
+    showSpinner();
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://wild-mascot-730.azurewebsites.net/api/generate', true);
+    //set cors headers
+    xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
 
-  xhr.onload = function () {
-    document.getElementById('h1A').textContent = this.responseText;
-  };
+    xhr.onload = function () {
+      document.getElementsByClassName("spinner-grow")[0].style.display = "none";
+      document.getElementsByClassName("spinner-grow")[1].style.display = "none";
+      document.getElementsByClassName("spinner-grow")[2].style.display = "none";
+      document.getElementById('h1A').innerText = this.responseText;
+      document.getElementById('h1A').style.display = 'block';
+      document.getElementById('copyBtn').style.display = 'inline-block';
+    };
 
-  xhr.send(null);
+    xhr.send(null);
+  }
+  
+  function showSpinner() {
+      document.getElementsByClassName("spinner-grow")[0].style.display = "inline-block";
+      document.getElementsByClassName("spinner-grow")[1].style.display = "inline-block";
+      document.getElementsByClassName("spinner-grow")[2].style.display = "inline-block";
+      document.getElementById('h1A').innerText = this.responseText;
+      document.getElementById('h1A').style.display = 'none';
+      document.getElementById('copyBtn').style.display = 'none';
+  }
+
+  getName();
 </script>
     </div>
     <footer>
             <p>&copy; 2021 - Clint Parker</p>
     </footer>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
         <!-- <script src="/lib/jquery/dist/jquery.js"></script>
         <script src="/lib/bootstrap/dist/js/bootstrap.js"></script> -->
     
