@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace name_on_core
 {
@@ -24,8 +25,15 @@ namespace name_on_core
 
         public string Gen()
         {
-            // var retVal = "Test-one-123";
-            var retVal = Instance.GenRandomString();
+            return Gen("-",ElementType.Adjective,ElementType.Noun,ElementType.ThreeDigit);
+        }
+        public string Gen(params ElementType[] types)
+        {
+            return Gen("-",types);
+        }
+        public string Gen(string separator, params ElementType[] types)
+        {
+            var retVal = String.Join(separator,types.Select(x=>MapElementTypeToString(x)));
             while (_lastReturn == retVal)
             {
                 retVal = Instance.GenRandomString();
@@ -33,17 +41,25 @@ namespace name_on_core
             _lastReturn = retVal;
             return _lastReturn;
         }
-         
-        
+
+   public string MapElementTypeToString(ElementType et) => et switch
+    {
+        ElementType.Noun    => GenRandomNoun(),
+        ElementType.Adjective => GenRandomAdjective(),
+        ElementType.ThreeDigit  => GenRandomThreeDigits(),
+        _ => throw new ArgumentOutOfRangeException(nameof(et), $"Not expected element type value: {et}"),
+    };
+
+
         private string GenRandomString()
         {
             return $"{GenRandomAdjective()}-{GenRandomNoun()}-{GenRandomThreeDigits()}";
         }
 
         // TODO: keep the Random Instance as as private 
-        private int GenRandomThreeDigits()
+        private string GenRandomThreeDigits()
         {
-            return _random.Next(0,999);
+            return _random.Next(0,999).ToString();
         }
 
         private string GenRandomNoun()
@@ -59,4 +75,10 @@ namespace name_on_core
         private static List<string> Adjectives;
         private static List<string> Nouns;
     }
+    public enum ElementType{
+        Noun,
+        Adjective,
+        ThreeDigit
+    }
+
 }
