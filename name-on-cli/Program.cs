@@ -10,14 +10,6 @@ namespace name_on_cli
         static void Main(string[] args)
         {
             var n = new Namer();
-            foreach (var arg in args){
-                //Console.WriteLine(arg);
-                try {
-                    Console.WriteLine($"{arg}\ttype:{ArgMapper(arg).ToString()}");
-                } catch(ArgumentOutOfRangeException e){
-                    Console.WriteLine($"{arg}\ttype:unknown");
-                }
-            }
             ElementType[] ets;
             try {
                 ets = args.Select(x=>ArgMapper(x)).ToArray();
