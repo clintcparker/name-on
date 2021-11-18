@@ -1,6 +1,18 @@
 {
   "version": "0.2.0",
   "configurations": [
+    {
+      "name": "CLI",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "cwd": "${workspaceFolder}/name-on-cli",
+      "stopOnEntry": true,
+      "program": "${workspaceFolder}/name-on-cli/bin/Debug/net5.0/name-on-cli.dll",
+      "console": "integratedTerminal",
+      "args":"a n 3"
+    },
+
   {
     "name": ".NET Core Launch (web)",
     "type": "coreclr",
