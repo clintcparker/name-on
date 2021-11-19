@@ -11,8 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <!-- <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.css" /> -->
-        <!-- <link rel="stylesheet" href="/css/site.css" /> -->
+
     <style>
         body {
     padding-top: 50px;
@@ -84,9 +83,6 @@ footer {
 
     </style>
     
-    <!-- <link rel="stylesheet" href="/css/starter-template.css" />
-    <link rel="stylesheet" href="/css/sticky-footer.css" /> -->
-    
 </head>
 <body>
     <div class="body-content">
@@ -125,9 +121,7 @@ footer {
   function getName() {
     showSpinner();
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://wild-mascot-730.azurewebsites.net/api/generate', true);
-    //set cors headers
-    xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+    xhr.open('GET', '/api/generate', true);
 
     xhr.onload = function () {
       document.getElementById("spinners").style.display = "none";
@@ -155,8 +149,6 @@ footer {
             <p>&copy; 2021 - Clint Parker</p>
     </footer>
 
-        <!-- <script src="/lib/jquery/dist/jquery.js"></script>
-        <script src="/lib/bootstrap/dist/js/bootstrap.js"></script> -->
     
     
 
