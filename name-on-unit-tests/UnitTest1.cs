@@ -72,5 +72,15 @@ namespace name_on_unit_tests
             return $" BAD VALUES: \n\n\n {s1}  \n\n\n\n";
         }
 
+        [TestMethod]
+        public void AdjectiveNounNoun()
+        {
+            var n = new name_on_core.Namer();
+            var name = n.Gen(ElementType.Adjective,ElementType.Noun,ElementType.Noun);
+            Debug.WriteLine(name);
+            Assert.IsTrue(true);
+        }
+        
+
     }
 }
