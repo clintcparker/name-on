@@ -81,7 +81,7 @@
       "type": "func",
       "dependsOn": "build (functions)",
       "options": {
-        "cwd": "${workspaceFolder}/azfn/bin/Debug/net6.0"
+        "cwd": "${workspaceFolder}/azfn/bin/Debug/net7.0"
       },
       "command": "host start",
       "isBackground": true,

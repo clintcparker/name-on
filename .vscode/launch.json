@@ -7,37 +7,49 @@
       "request": "launch",
       "preLaunchTask": "build",
       "cwd": "${workspaceFolder}/name-on-cli",
-      "stopOnEntry": true,
-      "program": "${workspaceFolder}/name-on-cli/bin/Debug/net5.0/name-on-cli.dll",
+      // "stopOnEntry": true,
+      "program": "${workspaceFolder}/name-on-cli/bin/Debug/net8.0/name-on-cli.dll",
       "console": "integratedTerminal",
       "args":"a n 3"
     },
-
-  {
-    "name": ".NET Core Launch (web)",
-    "type": "coreclr",
-    "request": "launch",
-    "preLaunchTask": "build",
-    "program": "${workspaceFolder}/name-on-web/bin/Debug/net5.0/name-on-web.dll",
-    "args": [],
-    "cwd": "${workspaceFolder}/name-on-web",
-    "stopAtEntry": false,
-    "serverReadyAction": {
-      "action": "openExternally",
-      "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+    {
+      "name": ".NET Core Launch (web)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/name-on/name-on-web/bin/Debug/net8.0/name-on-web.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/name-on-web/Views"
+      }
     },
-    "env": {
-      "ASPNETCORE_ENVIRONMENT": "Development"
-    },
-    "sourceFileMap": {
-      "/Views": "${workspaceFolder}/name-on-web/Views"
-    }
-  },
     {
       "name": "Attach to .NET Functions",
       "type": "coreclr",
       "request": "attach",
       "processId": "${command:azureFunctions.pickProcess}"
+    },
+    {
+      "name": ".NET Functions (azfn, local)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build (functions)",
+      "program": "${workspaceFolder}/azfn/bin/Debug/net8.0/azfn.dll",
+      "cwd": "${workspaceFolder}/azfn",
+      "console": "integratedTerminal",
+      "env": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
+      }
     }
   ]
 }
