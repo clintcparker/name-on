@@ -1,38 +1,59 @@
-
 # Name-On
 ![Release](https://clintcparker.vsrm.visualstudio.com/_apis/public/Release/badge/5eb5c9e0-ca41-4637-a6a1-1a4c8deda67b/1/1)
 
 ![Build](https://clintcparker.visualstudio.com/_apis/public/build/definitions/5eb5c9e0-ca41-4637-a6a1-1a4c8deda67b/7/badge?branchName=master&api-version=5.0-preview.2)
 
-## Introduction 
+## Introduction
 
-I've found my self needing one of these repeatedly over the last few months. So I built this one. You'll get a new _Adjective-Noun-Number_ combo with each new request.
+Name-On generates a new _Adjective-Noun-Number_ combo with each request. Useful for unique, human-readable names for projects, containers, or anything else.
 
-Check it out @ [name-on.site](https://name-on.site)
+Try it live: [name-on.clintcparker.com](https://name-on.clintcparker.com)
 
+---
 
 ## Structure
 
-Name-On consists of 4 components:
+Name-On now consists of these main components:
 
-1. name-on-core: A shared library with the core behavior logic
-1. name-on-unit-test: A unit testing project for the core library
-1. [name-on-cli](#cli): A command line wrapper for the core library
-1. [name-on-web](#api): An ASP.NET Core web app surfacing the core behaviors
+1. **name-on-core**: Shared library with the core name generation logic
+2. **name-on-unit-tests**: Unit tests for the core library
+3. **azfn**: Azure Functions project exposing the name generator as an HTTP API
+4. **index.html**: Static frontend (uses `/api/generate` endpoint from Azure Functions)
 
-### CLI
+---
 
-I'm a sucker for CLIs. But I'm not clear on how to deploy this one. For now, get the source, run `dotnet publish`, and then symlink from the new publish directory to someplace in your $PATH.
+## Usage
 
-### API
+- **Local development:**
+  - Run the Azure Functions project (`azfn`) locally using the Azure Functions Core Tools or VS Code launch config.
+  - Open `index.html` in your browser. It will call the local `/api/generate` endpoint.
 
-That's right there's an API. You never know when you'll need to `curl` this because you haven't installed the CLI yet. 
+- **Production:**
+  - Deploy the `azfn` project to Azure Functions.
+  - Host `index.html` as a static site (Azure Static Web Apps, blob storage, or any static host).
+  - Ensure the static site is configured to call the correct `/api/generate` endpoint (update the JS if needed for your deployment).
 
-`curl https://name-on.site/api/name`
+---
+
+## Example API Call
+
+```
+GET /api/generate
+```
+Returns a plain text name, e.g.:
+```
+clever-otter-123
+```
+
+---
 
 ## Roadmap
-1. Add a button to copy to clipboard
-1. CD for publishing CLI to various sources
-    1. Homebrew
-    1. Chocolatey
-    1. APT
+- [x] Add a button to copy to clipboard
+- [x] Migrate to Azure Functions + static frontend
+- [ ] Add deployment scripts/examples for Azure Static Web Apps
+- [ ] Add more customization options for name format
+
+---
+
+## License
+MIT
