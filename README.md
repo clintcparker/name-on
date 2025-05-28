@@ -18,7 +18,7 @@ Name-On now consists of these main components:
 1. **name-on-core**: Shared library with the core name generation logic
 2. **name-on-unit-tests**: Unit tests for the core library
 3. **azfn**: Azure Functions project exposing the name generator as an HTTP API
-4. **index.html**: Static frontend (uses `/api/generate` endpoint from Azure Functions)
+4. **static/**: Static frontend directory (contains `index.html` and, in the future, any additional static assets)
 
 ---
 
@@ -26,11 +26,11 @@ Name-On now consists of these main components:
 
 - **Local development:**
   - Run the Azure Functions project (`azfn`) locally using the Azure Functions Core Tools or VS Code launch config.
-  - Open `index.html` in your browser. It will call the local `/api/generate` endpoint.
+  - Open `static/index.html` in your browser. It will call the local `/api/generate` endpoint.
 
 - **Production:**
   - Deploy the `azfn` project to Azure Functions.
-  - Host `index.html` as a static site (Azure Static Web Apps, blob storage, or any static host).
+  - Deploy the contents of the `static/` directory as your static site (Azure Static Web Apps, blob storage, or any static host).
   - Ensure the static site is configured to call the correct `/api/generate` endpoint (update the JS if needed for your deployment).
 
 ---
