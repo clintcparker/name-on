@@ -2,90 +2,18 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build",
+      "label": "build (blazor wasm)",
       "command": "dotnet",
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/name-on-unit-tests/name-on-unit-tests.csproj"
+        "${workspaceFolder}/name-on-blazor/name-on-blazor.csproj"
       ],
-      "problemMatcher": "$msCompile"
-    },
-    {
-      "label": "clean (functions)",
-      "command": "dotnet",
-      "args": [
-        "clean",
-        "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary"
-      ],
-      "type": "process",
       "problemMatcher": "$msCompile",
-      "options": {
-        "cwd": "${workspaceFolder}/azfn"
-      }
-    },
-    {
-      "label": "build (functions)",
-      "command": "dotnet",
-      "args": [
-        "build",
-        "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary"
-      ],
-      "type": "process",
-      "dependsOn": "clean (functions)",
       "group": {
         "kind": "build",
         "isDefault": true
-      },
-      "problemMatcher": "$msCompile",
-      "options": {
-        "cwd": "${workspaceFolder}/azfn"
       }
-    },
-    {
-      "label": "clean release (functions)",
-      "command": "dotnet",
-      "args": [
-        "clean",
-        "--configuration",
-        "Release",
-        "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary"
-      ],
-      "type": "process",
-      "problemMatcher": "$msCompile",
-      "options": {
-        "cwd": "${workspaceFolder}/azfn"
-      }
-    },
-    {
-      "label": "publish (functions)",
-      "command": "dotnet",
-      "args": [
-        "publish",
-        "--configuration",
-        "Release",
-        "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary"
-      ],
-      "type": "process",
-      "dependsOn": "clean release (functions)",
-      "problemMatcher": "$msCompile",
-      "options": {
-        "cwd": "${workspaceFolder}/azfn"
-      }
-    },
-    {
-      "type": "func",
-      "dependsOn": "build (functions)",
-      "options": {
-        "cwd": "${workspaceFolder}/azfn/bin/Debug/net8.0"
-      },
-      "command": "host start",
-      "isBackground": true,
-      "problemMatcher": "$func-dotnet-watch"
     }
   ]
 }

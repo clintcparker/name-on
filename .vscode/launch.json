@@ -2,54 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "CLI",
-      "type": "coreclr",
+      "name": ".NET Core Launch (Blazor WASM)",
+      "type": "blazorwasm",
       "request": "launch",
-      "preLaunchTask": "build",
-      "cwd": "${workspaceFolder}/name-on-cli",
-      // "stopOnEntry": true,
-      "program": "${workspaceFolder}/name-on-cli/bin/Debug/net8.0/name-on-cli.dll",
-      "console": "integratedTerminal",
-      "args":"a n 3"
-    },
-    {
-      "name": ".NET Core Launch (web)",
-      "type": "coreclr",
-      "request": "launch",
-      "preLaunchTask": "build",
-      "program": "${workspaceFolder}/name-on/name-on-web/bin/Debug/net8.0/name-on-web.dll",
-      "args": [],
-      "cwd": "${workspaceFolder}",
-      "stopAtEntry": false,
-      "serverReadyAction": {
-        "action": "openExternally",
-        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
-      },
-      "env": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "sourceFileMap": {
-        "/Views": "${workspaceFolder}/name-on-web/Views"
-      }
-    },
-    {
-      "name": "Attach to .NET Functions",
-      "type": "coreclr",
-      "request": "attach",
-      "processId": "${command:azureFunctions.pickProcess}"
-    },
-    {
-      "name": ".NET Functions (azfn, local)",
-      "type": "coreclr",
-      "request": "launch",
-      "preLaunchTask": "build (functions)",
-      "program": "${workspaceFolder}/azfn/bin/Debug/net8.0/azfn.dll",
-      "cwd": "${workspaceFolder}/azfn",
-      "console": "integratedTerminal",
-      "env": {
-        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
-      }
+      "preLaunchTask": "build (blazor wasm)",
+      "url": "http://localhost:5000",
+      "cwd": "${workspaceFolder}/name-on-blazor",
+      "browser": "edge"
     }
   ]
 }
