@@ -1,0 +1,16 @@
+name: Setup .NET
+
+on: [workflow_call]
+
+jobs:
+  setup_dotnet_job:
+    runs-on: ubuntu-latest
+    name: Setup .NET
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'

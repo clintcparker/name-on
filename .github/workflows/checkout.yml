@@ -1,0 +1,17 @@
+name: Checkout Source
+
+on: [workflow_call]
+
+jobs:
+  checkout_job:
+    runs-on: ubuntu-latest
+    name: Checkout Source
+    outputs:
+      commit_hash: ${{ steps.get_commit.outputs.commit_hash }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Get Commit Hash
+        id: get_commit
+        run: echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT

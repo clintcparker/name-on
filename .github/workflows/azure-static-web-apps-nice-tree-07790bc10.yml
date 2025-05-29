@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: Name-On CI/CD
 
 on:
   push:
@@ -10,41 +10,17 @@ on:
       - main
 
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
-    runs-on: ubuntu-latest
-    name: Build and Deploy Job
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '9.0.x'
-      - name: Publish Blazor WASM
-        run: dotnet publish ./name-on-blazor/name-on-blazor.csproj -c Release -o build_output
-      - name: Build And Deploy
-        id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_NICE_TREE_07790BC10 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
-          action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "build_output/wwwroot" # Blazor WASM output directory
-          output_location: "" # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
-
+  checkout_job:
+    uses: ./.github/workflows/checkout.yml
+  setup_dotnet_job:
+    needs: checkout_job
+    uses: ./.github/workflows/setup-dotnet.yml
+  publish_blazor_job:
+    needs: setup_dotnet_job
+    uses: ./.github/workflows/publish-blazor.yml
+  deploy_job:
+    needs: publish_blazor_job
+    uses: ./.github/workflows/deploy.yml
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_NICE_TREE_07790BC10 }}
-          action: "close"
+    uses: ./.github/workflows/close-pull-request.yml
