@@ -1,9 +1,4 @@
 # Name-On
-![Release](https://clintcparker.vsrm.visualstudio.com/_apis/public/Release/badge/5eb5c9e0-ca41-4637-a6a1-1a4c8deda67b/1/1)
-
-![Build](https://clintcparker.visualstudio.com/_apis/public/build/definitions/5eb5c9e0-ca41-4637-a6a1-1a4c8deda67b/7/badge?branchName=master&api-version=5.0-preview.2)
-
-## Introduction
 
 Name-On generates a new _Adjective-Noun-Number_ combo with each request. Useful for unique, human-readable names for projects, containers, or anything else.
 
@@ -11,36 +6,39 @@ Try it live: [name-on.clintcparker.com](https://name-on.clintcparker.com)
 
 ---
 
-## Structure
+## Architecture (2024+)
 
-Name-On now consists of these main components:
+Name-On is now a **Blazor WebAssembly (WASM)** app that runs entirely in the browser, using a shared C# core library for name generation. There are no server-side APIs or Azure Functions required.
 
-1. **name-on-core**: Shared library with the core name generation logic
-2. **name-on-unit-tests**: Unit tests for the core library
-3. **azfn**: Azure Functions project exposing the name generator as an HTTP API
-4. **static/**: Static frontend directory (contains `index.html` and, in the future, any additional static assets)
+### Solution Structure
+
+- **name-on-core**: Shared C# library with the core name generation logic
+- **name-on-blazor**: Blazor WASM frontend, directly references and uses `name-on-core`
+- **name-on-unit-tests**: Unit tests for the core library
+
+**Legacy directories removed:**
+- `azfn/` (Azure Functions) — no longer used
+- `static/` (old static site) — replaced by Blazor WASM
 
 ---
 
 ## Usage
 
-- **Local development:**
-  - Run the Azure Functions project (`azfn`) locally using the Azure Functions Core Tools or VS Code launch config.
-  - Open `static/index.html` in your browser. It will call the local `/api/generate` endpoint.
+### Local Development
 
-- **Production:**
-  - Deploy the `azfn` project to Azure Functions.
-  - Deploy the contents of the `static/` directory as your static site (Azure Static Web Apps, blob storage, or any static host).
-  - Ensure the static site is configured to call the correct `/api/generate` endpoint (update the JS if needed for your deployment).
+- Open the solution in VS Code.
+- Use the provided build and debug tasks to run the Blazor WASM app (`name-on-blazor`).
+- All name generation is client-side; no backend required.
+
+### Production Deployment
+
+- Deploy the contents of `name-on-blazor/bin/Release/net8.0/wwwroot` to your static host (Azure Static Web Apps, blob storage, etc).
+- The included GitHub Actions workflow deploys the Blazor WASM output to Azure Static Web Apps.
 
 ---
 
-## Example API Call
+## Example Output
 
-```
-GET /api/generate
-```
-Returns a plain text name, e.g.:
 ```
 clever-otter-123
 ```
@@ -48,9 +46,9 @@ clever-otter-123
 ---
 
 ## Roadmap
-- [x] Add a button to copy to clipboard
-- [x] Migrate to Azure Functions + static frontend
-- [ ] Add deployment scripts/examples for Azure Static Web Apps
+- [x] Migrate to Blazor WebAssembly (WASM) only
+- [x] Remove Azure Functions and legacy static frontend
+- [x] Modernize deployment for static hosting
 - [ ] Add more customization options for name format
 
 ---
