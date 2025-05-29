@@ -1,0 +1,20 @@
+{
+  "name": "Blazor WASM DevContainer",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "fish"
+  },
+  "features": {},
+  "postCreateCommand": "chsh -s /usr/bin/fish vscode || true",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "fish-shell.fish-vscode"
+      ]
+    }
+  }
+}
