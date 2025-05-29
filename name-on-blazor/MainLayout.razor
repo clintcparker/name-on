@@ -1,10 +1,23 @@
 @inherits LayoutComponentBase
+@inject CommitHashService CommitHashService
 
 <div class="body-content">
     <main role="main" class="container">
         @Body
     </main>
     <footer>
-        <p>&copy; 2025 - Clint Parker</p>
+        <p>
+            &copy; 2025 - Clint Parker<br />
+            Commit: @(_commitHash ?? "loading...")
+        </p>
     </footer>
 </div>
+
+@code {
+    private string? _commitHash;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _commitHash = await CommitHashService.GetCommitHashAsync();
+    }
+}
