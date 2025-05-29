@@ -1,3 +1,0 @@
-# This step writes the latest commit hash to commit.txt for Blazor to display in the footer
-- name: Write commit hash to commit.txt
-  run: echo "${{ github.sha }}" > name-on-blazor/wwwroot/commit.txt
