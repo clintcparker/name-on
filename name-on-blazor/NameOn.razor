@@ -1,6 +1,9 @@
 @page "/"
 @using name_on_core
 @using Microsoft.JSInterop
+@using System.Linq
+@using System.Text.Json
+@using System.Collections.Generic
 
 <div class="starter-template" id="uniqueName">
     <h1 id="spinners" style="display:@(IsLoading ? "inline-block" : "none")">
@@ -22,12 +25,125 @@
             <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
         </svg>
     </button>
+
+    <div class="mt-3">
+        <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleCustomization">
+            @(_showCustomization ? "Hide" : "Show") Options
+        </button>
+    </div>
+
+    @if (_showCustomization)
+    {
+        <div class="card mt-3 mx-auto" style="max-width: 400px; text-align: left;">
+            <div class="card-body">
+                <h6 class="card-title">Name Format</h6>
+                @foreach (var template in FormatTemplate.All)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio"
+                               name="template" id="template-@template.Id"
+                               checked="@(_selectedTemplateId == template.Id)"
+                               @onchange="@(() => SelectTemplate(template))" />
+                        <label class="form-check-label" for="template-@template.Id">
+                            @template.Label
+                        </label>
+                    </div>
+                }
+
+                <hr />
+                <h6 class="card-title">Joining Style</h6>
+                @foreach (var style in _joiningStyles)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio"
+                               name="joiningStyle" id="style-@style.Key"
+                               checked="@(_selectedJoiningStyle == style.Key)"
+                               @onchange="@(() => SelectJoiningStyle(style.Key))" />
+                        <label class="form-check-label" for="style-@style.Key">
+                            @style.Value
+                        </label>
+                    </div>
+                }
+
+                @if (_options.Template.HasNumber)
+                {
+                    <hr />
+                    <h6 class="card-title">Number Range</h6>
+                    <div class="form-group">
+                        <select class="form-control form-control-sm" value="@_selectedMaxValue"
+                                @onchange="OnMaxValueChanged">
+                            <option value="9">0 - 9</option>
+                            <option value="99">0 - 99</option>
+                            <option value="999">0 - 999</option>
+                            <option value="9999">0 - 9999</option>
+                        </select>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="zeroPad"
+                               checked="@_zeroPad"
+                               @onchange="OnZeroPadChanged" />
+                        <label class="form-check-label" for="zeroPad">
+                            Zero-pad numbers
+                        </label>
+                    </div>
+                }
+
+                <hr />
+                <h6 class="card-title">Word Length</h6>
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="minLength" class="small">Min length</label>
+                        <input type="number" class="form-control form-control-sm" id="minLength"
+                               min="1" max="20" placeholder="Any"
+                               value="@(_wordMinLength?.ToString() ?? "")"
+                               @onchange="OnMinLengthChanged" />
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="maxLength" class="small">Max length</label>
+                        <input type="number" class="form-control form-control-sm" id="maxLength"
+                               min="1" max="20" placeholder="Any"
+                               value="@(_wordMaxLength?.ToString() ?? "")"
+                               @onchange="OnMaxLengthChanged" />
+                    </div>
+                </div>
+                @if (_poolWarning != null)
+                {
+                    <div class="alert alert-warning small py-1 px-2 mt-1 mb-0">
+                        @_poolWarning
+                    </div>
+                }
+
+                <hr />
+                <button class="btn btn-outline-danger btn-sm btn-block" @onclick="ResetToDefaults">
+                    Reset to Defaults
+                </button>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     private Namer _namer = new();
     private string CurrentName = string.Empty;
     private bool IsLoading = true;
+    private bool _showCustomization = false;
+    private string _selectedTemplateId = FormatTemplate.Default.Id;
+    private JoiningStyle _selectedJoiningStyle = JoiningStyle.Dash;
+    private int _selectedMaxValue = 999;
+    private bool _zeroPad = false;
+    private int? _wordMinLength = null;
+    private int? _wordMaxLength = null;
+    private string _poolWarning = null;
+    private NameOptions _options = NameOptions.Default;
+
+    private static readonly (JoiningStyle Key, string Value)[] _joiningStyles = new[]
+    {
+        (JoiningStyle.Dash, "Dash (word-word)"),
+        (JoiningStyle.Underscore, "Underscore (word_word)"),
+        (JoiningStyle.None, "None (wordword)"),
+        (JoiningStyle.CamelCase, "camelCase"),
+        (JoiningStyle.PascalCase, "PascalCase")
+    };
 
     [Inject]
     private IJSRuntime JS { get; set; } = default!;
@@ -37,11 +153,121 @@
         GenerateName();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadPreferences();
+            GenerateName();
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleCustomization()
+    {
+        _showCustomization = !_showCustomization;
+    }
+
+    private async Task SelectTemplate(FormatTemplate template)
+    {
+        _selectedTemplateId = template.Id;
+        RebuildOptions();
+        GenerateName();
+        await SavePreferences();
+    }
+
+    private async Task SelectJoiningStyle(JoiningStyle style)
+    {
+        _selectedJoiningStyle = style;
+        RebuildOptions();
+        GenerateName();
+        await SavePreferences();
+    }
+
+    private async Task OnMaxValueChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var maxValue))
+        {
+            _selectedMaxValue = maxValue;
+            RebuildOptions();
+            GenerateName();
+            await SavePreferences();
+        }
+    }
+
+    private async Task OnZeroPadChanged(ChangeEventArgs e)
+    {
+        _zeroPad = (bool)(e.Value ?? false);
+        RebuildOptions();
+        GenerateName();
+        await SavePreferences();
+    }
+
+    private async Task OnMinLengthChanged(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        _wordMinLength = string.IsNullOrWhiteSpace(val) ? null : int.TryParse(val, out var n) ? n : null;
+        RebuildOptions();
+        UpdatePoolWarning();
+        GenerateName();
+        await SavePreferences();
+    }
+
+    private async Task OnMaxLengthChanged(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        _wordMaxLength = string.IsNullOrWhiteSpace(val) ? null : int.TryParse(val, out var n) ? n : null;
+        RebuildOptions();
+        UpdatePoolWarning();
+        GenerateName();
+        await SavePreferences();
+    }
+
+    private async Task ResetToDefaults()
+    {
+        _selectedTemplateId = FormatTemplate.Default.Id;
+        _selectedJoiningStyle = JoiningStyle.Dash;
+        _selectedMaxValue = 999;
+        _zeroPad = false;
+        _wordMinLength = null;
+        _wordMaxLength = null;
+        _poolWarning = null;
+        _options = NameOptions.Default;
+        GenerateName();
+        await JS.InvokeVoidAsync("localStorage.removeItem", "name-on-preferences");
+    }
+
+    private void UpdatePoolWarning()
+    {
+        _poolWarning = null;
+        var filter = _options.WordFilter;
+        var filteredAdj = filter.Filter(Namer.Adjectives);
+        var filteredNouns = filter.Filter(Namer.Nouns);
+        var warnings = new List<string>();
+        if (filter.IsPoolTooSmall(filteredAdj))
+            warnings.Add($"Only {filteredAdj.Count} adjectives match (minimum recommended: {WordLengthFilter.MinPoolSize})");
+        if (filter.IsPoolTooSmall(filteredNouns))
+            warnings.Add($"Only {filteredNouns.Count} nouns match (minimum recommended: {WordLengthFilter.MinPoolSize})");
+        if (warnings.Count > 0)
+            _poolWarning = string.Join(" ", warnings);
+    }
+
+    private void RebuildOptions()
+    {
+        var template = FormatTemplate.All.FirstOrDefault(t => t.Id == _selectedTemplateId)
+                       ?? FormatTemplate.Default;
+        _options = new NameOptions(
+            template: template,
+            joiningStyle: _selectedJoiningStyle,
+            numberConfig: new NumberConfig(maxValue: _selectedMaxValue, zeroPad: _zeroPad),
+            wordFilter: new WordLengthFilter(_wordMinLength, _wordMaxLength));
+    }
+
     private void GenerateName()
     {
         IsLoading = true;
         StateHasChanged();
-        CurrentName = _namer.Gen();
+        CurrentName = _namer.Gen(_options);
         IsLoading = false;
     }
 
@@ -50,6 +276,75 @@
         if (!string.IsNullOrEmpty(CurrentName))
         {
             await JS.InvokeVoidAsync("navigator.clipboard.writeText", CurrentName);
+        }
+    }
+
+    private async Task SavePreferences()
+    {
+        var prefs = new
+        {
+            templateId = _selectedTemplateId,
+            joiningStyle = _selectedJoiningStyle.ToString(),
+            numberMaxValue = _selectedMaxValue,
+            numberZeroPad = _zeroPad,
+            wordMinLength = _wordMinLength,
+            wordMaxLength = _wordMaxLength
+        };
+        var json = JsonSerializer.Serialize(prefs);
+        await JS.InvokeVoidAsync("localStorage.setItem", "name-on-preferences", json);
+    }
+
+    private async Task LoadPreferences()
+    {
+        try
+        {
+            var json = await JS.InvokeAsync<string>("localStorage.getItem", "name-on-preferences");
+            if (string.IsNullOrEmpty(json))
+                return;
+
+            using var doc = JsonDocument.Parse(json);
+
+            if (doc.RootElement.TryGetProperty("templateId", out var templateIdEl))
+            {
+                var templateId = templateIdEl.GetString();
+                var template = FormatTemplate.All.FirstOrDefault(t => t.Id == templateId);
+                if (template != null)
+                    _selectedTemplateId = template.Id;
+            }
+
+            if (doc.RootElement.TryGetProperty("joiningStyle", out var joiningStyleEl))
+            {
+                if (System.Enum.TryParse<JoiningStyle>(joiningStyleEl.GetString(), out var style))
+                    _selectedJoiningStyle = style;
+            }
+
+            if (doc.RootElement.TryGetProperty("numberMaxValue", out var maxValueEl))
+            {
+                if (maxValueEl.TryGetInt32(out var maxValue))
+                    _selectedMaxValue = maxValue;
+            }
+
+            if (doc.RootElement.TryGetProperty("numberZeroPad", out var zeroPadEl))
+            {
+                _zeroPad = zeroPadEl.GetBoolean();
+            }
+
+            if (doc.RootElement.TryGetProperty("wordMinLength", out var minLenEl))
+            {
+                _wordMinLength = minLenEl.ValueKind == JsonValueKind.Null ? null : minLenEl.GetInt32();
+            }
+
+            if (doc.RootElement.TryGetProperty("wordMaxLength", out var maxLenEl))
+            {
+                _wordMaxLength = maxLenEl.ValueKind == JsonValueKind.Null ? null : maxLenEl.GetInt32();
+            }
+
+            RebuildOptions();
+            UpdatePoolWarning();
+        }
+        catch
+        {
+            // localStorage may not be available during prerendering
         }
     }
 }

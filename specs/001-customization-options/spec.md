@@ -39,6 +39,8 @@ A user wants names formatted differently for their specific use case — for exa
 3. **Given** the user selects "PascalCase," **When** they generate a name, **Then** all words are capitalized with no separator (e.g., "CleverOtter123").
 4. **Given** the user selects "none" (no separator), **When** they generate a name, **Then** all parts are concatenated with no separator and no casing changes (e.g., "cleverotter123").
 5. **Given** the user has not changed any settings, **When** they generate a name, **Then** the dash separator is used (current default behavior preserved).
+6. **Given** the user selects "camelCase" and uses a template that includes a number component (e.g., adjective-noun-number), **When** a name is generated, **Then** the number is appended as plain digits immediately after the preceding word with no separator or casing change (e.g., "cleverOtter42").
+7. **Given** the user selects "PascalCase" and uses the noun-number template, **When** a name is generated, **Then** the noun is capitalized and the number follows as plain digits (e.g., "Otter42").
 
 ---
 
@@ -91,7 +93,7 @@ A user wants to constrain how long or short the words in generated names can be 
 ### Functional Requirements
 
 - **FR-001**: System MUST offer at least five predefined format templates: adjective-noun-number (default), adjective-noun, noun-adjective-number, adjective-adjective-noun, and noun-number.
-- **FR-002**: System MUST allow users to select a separator style from: dash (default), underscore, camelCase, PascalCase, and no separator.
+- **FR-002**: System MUST allow users to select a joining style from: dash (default), underscore, no separator, camelCase, or PascalCase. The first three are literal join characters (or absence thereof) applied between name elements. camelCase and PascalCase are casing transformations that also join with no separator — camelCase lowercases the first element and capitalizes subsequent word elements; PascalCase capitalizes all word elements. Numeric elements are always rendered as plain digits with no casing transformation applied, regardless of joining style.
 - **FR-003**: System MUST allow users to configure the number range with a minimum of 0 and a configurable maximum of 9, 99, 999 (default), or 9999.
 - **FR-004**: System MUST allow users to enable or disable zero-padding for the numeric portion, where the pad width matches the maximum digits of the selected range (e.g., 3 digits for 0–999).
 - **FR-005**: System MUST allow users to set an optional minimum and/or maximum word length to filter the available adjective and noun pools.
@@ -104,10 +106,17 @@ A user wants to constrain how long or short the words in generated names can be 
 - **FR-012**: Generated names MUST always match the active combination of format template, separator style, number range, padding, and word length filters.
 - **FR-013**: System MUST preserve backward compatibility — the default configuration (no customizations applied) MUST produce names identical in structure to the current output (adjective-dash-noun-dash-number).
 
+### Non-Functional Requirements
+
+- **NFR-001**: All customization controls MUST be keyboard-accessible (tab-navigable, operable via Enter/Space) so the panel is usable without a mouse.
+- **NFR-002**: The customization panel MUST render correctly on viewports 320px wide and above, reflowing to a stacked layout on small screens.
+- **NFR-003**: Changing any customization setting and generating a name MUST NOT introduce perceptible render latency beyond the current generation time (no additional network calls or heavy computation).
+- **NFR-004**: Word-length filtering MUST execute entirely in-memory on the existing dictionaries with no lazy-loading or external data fetch.
+
 ### Key Entities
 
 - **Format Template**: A predefined pattern defining which elements (adjective, noun, number) compose a name and in what order. Has a label, an ordered list of element types, and an example output.
-- **Separator Style**: The character or casing convention used to join name elements. Includes both literal characters (dash, underscore, empty) and casing transformations (camelCase, PascalCase).
+- **Joining Style**: The convention used to join name elements. Comprises two sub-types: (a) **literal join characters** — dash, underscore, or empty string — inserted between elements without altering casing; and (b) **casing transformations** — camelCase or PascalCase — which join with no separator and apply capitalization rules to word elements. Numeric elements are never cased; they are rendered as plain digits in all joining styles.
 - **Number Configuration**: Defines the range (maximum value) and optional zero-padding for the numeric element. Only relevant when the active format template includes a number component.
 - **Word Length Filter**: Optional minimum and maximum character length constraints applied to the adjective and noun pools. When active, only words within the specified range are eligible for selection.
 - **User Preferences**: The collection of all customization settings (template, separator, number config, word length filter) persisted in the browser.
@@ -125,6 +134,8 @@ A user wants to constrain how long or short the words in generated names can be 
 
 ## Assumptions
 
+- All name-generation logic — including format template resolution, separator/casing joining, number range selection, zero-padding, and word-length filtering — MUST be implemented in `name-on-core` per Constitution Principle II (Portable Core Library). The Blazor UI layer is responsible only for preference persistence (localStorage) and panel rendering.
+- The existing `ElementType.ThreeDigit` enum value in `name-on-core` will need to be generalized to support configurable number ranges. This is a breaking change to the core API surface.
 - The predefined format templates are sufficient for initial release; custom user-defined templates are out of scope.
 - Preference persistence uses browser-local storage only (no accounts or server-side storage), consistent with the project's client-side-first principle.
 - Word lists (adjectives and nouns) remain the existing built-in dictionaries. Custom word lists are a separate roadmap feature (Theme Packs / Word Lists).
