@@ -80,7 +80,17 @@ namespace name_on_unit_tests
             Debug.WriteLine(name);
             Assert.IsTrue(true);
         }
-        
+
+        [TestMethod]
+        public void GenNoArgsProducesBackwardCompatibleFormat()
+        {
+            var namer = new name_on_core.Namer();
+            var name = namer.Gen();
+            var pattern = @"^[a-zA-Z]+-[a-zA-Z]+-\d+$";
+            var r = new Regex(pattern);
+            Assert.IsTrue(r.IsMatch(name),
+                $"Backward compat: '{name}' doesn't match {pattern}");
+        }
 
     }
 }

@@ -19,8 +19,8 @@
 
 **Purpose**: Verify baseline health before making changes
 
-- [ ] T001 Run `dotnet test` in name-on-unit-tests/ and confirm all 5 existing tests pass
-- [ ] T002 Run `dotnet publish -c Release` in name-on-blazor/ and confirm static site builds successfully
+- [x] T001 Run `dotnet test` in name-on-unit-tests/ and confirm all 5 existing tests pass
+- [x] T002 Run `dotnet publish -c Release` in name-on-blazor/ and confirm static site builds successfully
 
 ---
 
@@ -32,25 +32,25 @@
 
 ### Tests (Red phase -- all must fail before implementation)
 
-- [ ] T003 [P] Write test in name-on-unit-tests/FormatTemplateTests.cs: verify `FormatTemplate.Default` has elements `[Adjective, Noun, Number]`
-- [ ] T004 [P] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `JoiningStyle.Dash` joins `["clever", "otter", "42"]` into `"clever-otter-42"`
-- [ ] T005 [P] Write test in name-on-unit-tests/NumberConfigTests.cs: verify default `NumberConfig` generates numbers in range 0-999 with no padding
-- [ ] T006 [P] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify default `WordLengthFilter(null, null)` returns the full unfiltered list
-- [ ] T007 [P] Write test in name-on-unit-tests/NameOptionsTests.cs: verify `NameOptions.Default` matches current behavior (adjective-dash-noun-dash-number format)
-- [ ] T008 Write test in name-on-unit-tests/UnitTest1.cs: verify `Namer.Gen()` with no args still produces adjective-dash-noun-dash-number pattern (backward compatibility guard)
+- [x] T003 [P] Write test in name-on-unit-tests/FormatTemplateTests.cs: verify `FormatTemplate.Default` has elements `[Adjective, Noun, Number]`
+- [x] T004 [P] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `JoiningStyle.Dash` joins `["clever", "otter", "42"]` into `"clever-otter-42"`
+- [x] T005 [P] Write test in name-on-unit-tests/NumberConfigTests.cs: verify default `NumberConfig` generates numbers in range 0-999 with no padding
+- [x] T006 [P] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify default `WordLengthFilter(null, null)` returns the full unfiltered list
+- [x] T007 [P] Write test in name-on-unit-tests/NameOptionsTests.cs: verify `NameOptions.Default` matches current behavior (adjective-dash-noun-dash-number format)
+- [x] T008 Write test in name-on-unit-tests/UnitTest1.cs: verify `Namer.Gen()` with no args still produces adjective-dash-noun-dash-number pattern (backward compatibility guard)
 
 ### Implementation (Green phase)
 
-- [ ] T009 Rename `ElementType.ThreeDigit` to `ElementType.Number` in name-on-core/Namer.cs and update the switch expression in `MapElementTypeToString`
-- [ ] T010 [P] Create name-on-core/NumberConfig.cs: record with `MaxValue` (default 999), `ZeroPad` (default false), `PadWidth` computed property, and `Format(int n)` method per data-model.md
-- [ ] T011 [P] Create name-on-core/JoiningStyle.cs: enum with values `Dash`, `Underscore`, `None`, `CamelCase`, `PascalCase` and a static `Join(JoiningStyle style, string[] parts)` method that handles dash/underscore/none as literal join characters
-- [ ] T012 [P] Create name-on-core/WordLengthFilter.cs: record with `MinLength` (int?), `MaxLength` (int?), `Filter(List<string> words)` method, and `IsPoolTooSmall(List<string> filtered)` method (threshold: 20)
-- [ ] T013 [P] Create name-on-core/FormatTemplate.cs: record with `Id`, `Label`, `Elements` (ElementType[]), `HasNumber` computed property, and a static `Default` property returning adjective-noun-number template
-- [ ] T014 Create name-on-core/NameOptions.cs: record with `Template` (FormatTemplate), `JoiningStyle` (JoiningStyle), `NumberConfig` (NumberConfig), `WordFilter` (WordLengthFilter), and static `Default` property per data-model.md
-- [ ] T015 Refactor name-on-core/Namer.cs: add `Gen(NameOptions options)` method that uses options to select elements, generate parts, and join them; route existing `Gen()` overloads through `Gen(NameOptions.Default)` or equivalent wrappers
-- [ ] T016 Fix off-by-one bug in name-on-core/Namer.cs: change `_random.Next(0, Nouns.Count-1)` to `_random.Next(0, Nouns.Count)` and same for `Adjectives.Count-1` (Random.Next upper bound is exclusive)
-- [ ] T017 Run `dotnet test` in name-on-unit-tests/ and confirm all existing tests plus new foundational tests pass
-- [ ] T018 Run `dotnet build` on name-on-core/ to verify no compilation errors
+- [x] T009 Rename `ElementType.ThreeDigit` to `ElementType.Number` in name-on-core/Namer.cs and update the switch expression in `MapElementTypeToString`
+- [x] T010 [P] Create name-on-core/NumberConfig.cs: record with `MaxValue` (default 999), `ZeroPad` (default false), `PadWidth` computed property, and `Format(int n)` method per data-model.md
+- [x] T011 [P] Create name-on-core/JoiningStyle.cs: enum with values `Dash`, `Underscore`, `None`, `CamelCase`, `PascalCase` and a static `Join(JoiningStyle style, string[] parts)` method that handles dash/underscore/none as literal join characters
+- [x] T012 [P] Create name-on-core/WordLengthFilter.cs: record with `MinLength` (int?), `MaxLength` (int?), `Filter(List<string> words)` method, and `IsPoolTooSmall(List<string> filtered)` method (threshold: 20)
+- [x] T013 [P] Create name-on-core/FormatTemplate.cs: record with `Id`, `Label`, `Elements` (ElementType[]), `HasNumber` computed property, and a static `Default` property returning adjective-noun-number template
+- [x] T014 Create name-on-core/NameOptions.cs: record with `Template` (FormatTemplate), `JoiningStyle` (JoiningStyle), `NumberConfig` (NumberConfig), `WordFilter` (WordLengthFilter), and static `Default` property per data-model.md
+- [x] T015 Refactor name-on-core/Namer.cs: add `Gen(NameOptions options)` method that uses options to select elements, generate parts, and join them; route existing `Gen()` overloads through `Gen(NameOptions.Default)` or equivalent wrappers
+- [x] T016 Fix off-by-one bug in name-on-core/Namer.cs: change `_random.Next(0, Nouns.Count-1)` to `_random.Next(0, Nouns.Count)` and same for `Adjectives.Count-1` (Random.Next upper bound is exclusive)
+- [x] T017 Run `dotnet test` in name-on-unit-tests/ and confirm all existing tests plus new foundational tests pass
+- [x] T018 Run `dotnet build` on name-on-core/ to verify no compilation errors
 
 **Checkpoint**: Foundation ready -- `Namer.Gen()` routes through `NameOptions`, all core types exist with defaults, all tests green. User story implementation can now begin.
 
