@@ -96,25 +96,25 @@
 
 ### Tests (Red phase)
 
-- [ ] T032 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `Underscore` joins `["clever", "otter", "42"]` into `"clever_otter_42"`
-- [ ] T033 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `None` joins `["clever", "otter", "42"]` into `"cleverotter42"` (no casing changes)
-- [ ] T034 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `CamelCase` joins `["clever", "otter", "42"]` into `"cleverOtter42"` (first word lowercase, subsequent capitalized, number as-is)
-- [ ] T035 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `PascalCase` joins `["clever", "otter", "42"]` into `"CleverOtter42"` (all words capitalized, number as-is)
-- [ ] T036 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `CamelCase` with noun-number template joins `["otter", "42"]` into `"otter42"` (single word stays lowercase, number appended)
-- [ ] T037 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `PascalCase` with noun-number template joins `["otter", "42"]` into `"Otter42"`
+- [x] T032 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `Underscore` joins `["clever", "otter", "42"]` into `"clever_otter_42"`
+- [x] T033 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `None` joins `["clever", "otter", "42"]` into `"cleverotter42"` (no casing changes)
+- [x] T034 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `CamelCase` joins `["clever", "otter", "42"]` into `"cleverOtter42"` (first word lowercase, subsequent capitalized, number as-is)
+- [x] T035 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `PascalCase` joins `["clever", "otter", "42"]` into `"CleverOtter42"` (all words capitalized, number as-is)
+- [x] T036 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `CamelCase` with noun-number template joins `["otter", "42"]` into `"otter42"` (single word stays lowercase, number appended)
+- [x] T037 [P] [US2] Write test in name-on-unit-tests/JoiningStyleTests.cs: verify `PascalCase` with noun-number template joins `["otter", "42"]` into `"Otter42"`
 
 ### Implementation (Green phase)
 
-- [ ] T038 [US2] Implement casing transformation logic in the `Join` method of name-on-core/JoiningStyle.cs: CamelCase (first word lowercase, subsequent word parts capitalized via `char.ToUpperInvariant`, numbers appended as-is) and PascalCase (all word parts capitalized, numbers as-is)
-- [ ] T039 [US2] Integrate `JoiningStyle.Join` into `Gen(NameOptions)` in name-on-core/Namer.cs: generate parts as a string array first, then pass to `Join` with `options.JoiningStyle`
-- [ ] T040 [US2] Run `dotnet test` in name-on-unit-tests/ and confirm all tests pass
+- [x] T038 [US2] Implement casing transformation logic in the `Join` method of name-on-core/JoiningStyle.cs: CamelCase (first word lowercase, subsequent word parts capitalized via `char.ToUpperInvariant`, numbers appended as-is) and PascalCase (all word parts capitalized, numbers as-is)
+- [x] T039 [US2] Integrate `JoiningStyle.Join` into `Gen(NameOptions)` in name-on-core/Namer.cs: generate parts as a string array first, then pass to `Join` with `options.JoiningStyle`
+- [x] T040 [US2] Run `dotnet test` in name-on-unit-tests/ and confirm all tests pass
 
 ### Blazor UI
 
-- [ ] T041 [US2] Add a joining style radio button group or dropdown in the customization panel in name-on-blazor/NameOn.razor listing all 5 options: Dash (default), Underscore, None, camelCase, PascalCase
-- [ ] T042 [US2] Wire joining style selection to `NameOptions.JoiningStyle` and pass to `Namer.Gen(options)` in name-on-blazor/NameOn.razor
-- [ ] T043 [US2] Add localStorage persistence for joining style in name-on-blazor/NameOn.razor: extend the existing preferences save/load to include joining style
-- [ ] T044 [US2] Run `dotnet test` in name-on-unit-tests/ and confirm no existing tests are broken
+- [x] T041 [US2] Add a joining style radio button group or dropdown in the customization panel in name-on-blazor/NameOn.razor listing all 5 options: Dash (default), Underscore, None, camelCase, PascalCase
+- [x] T042 [US2] Wire joining style selection to `NameOptions.JoiningStyle` and pass to `Namer.Gen(options)` in name-on-blazor/NameOn.razor
+- [x] T043 [US2] Add localStorage persistence for joining style in name-on-blazor/NameOn.razor: extend the existing preferences save/load to include joining style
+- [x] T044 [US2] Run `dotnet test` in name-on-unit-tests/ and confirm no existing tests are broken
 
 **Checkpoint**: User Story 2 complete. Users can select any joining style and generated names use the correct separator or casing.
 

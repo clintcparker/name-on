@@ -48,6 +48,21 @@
                         </label>
                     </div>
                 }
+
+                <hr />
+                <h6 class="card-title">Joining Style</h6>
+                @foreach (var style in _joiningStyles)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio"
+                               name="joiningStyle" id="style-@style.Key"
+                               checked="@(_selectedJoiningStyle == style.Key)"
+                               @onchange="@(() => SelectJoiningStyle(style.Key))" />
+                        <label class="form-check-label" for="style-@style.Key">
+                            @style.Value
+                        </label>
+                    </div>
+                }
             </div>
         </div>
     }
@@ -59,7 +74,17 @@
     private bool IsLoading = true;
     private bool _showCustomization = false;
     private string _selectedTemplateId = FormatTemplate.Default.Id;
+    private JoiningStyle _selectedJoiningStyle = JoiningStyle.Dash;
     private NameOptions _options = NameOptions.Default;
+
+    private static readonly (JoiningStyle Key, string Value)[] _joiningStyles = new[]
+    {
+        (JoiningStyle.Dash, "Dash (word-word)"),
+        (JoiningStyle.Underscore, "Underscore (word_word)"),
+        (JoiningStyle.None, "None (wordword)"),
+        (JoiningStyle.CamelCase, "camelCase"),
+        (JoiningStyle.PascalCase, "PascalCase")
+    };
 
     [Inject]
     private IJSRuntime JS { get; set; } = default!;
@@ -92,13 +117,21 @@
         await SavePreferences();
     }
 
+    private async Task SelectJoiningStyle(JoiningStyle style)
+    {
+        _selectedJoiningStyle = style;
+        RebuildOptions();
+        GenerateName();
+        await SavePreferences();
+    }
+
     private void RebuildOptions()
     {
         var template = FormatTemplate.All.FirstOrDefault(t => t.Id == _selectedTemplateId)
                        ?? FormatTemplate.Default;
         _options = new NameOptions(
             template: template,
-            joiningStyle: _options.JoiningStyle,
+            joiningStyle: _selectedJoiningStyle,
             numberConfig: _options.NumberConfig,
             wordFilter: _options.WordFilter);
     }
@@ -121,7 +154,11 @@
 
     private async Task SavePreferences()
     {
-        var prefs = new { templateId = _selectedTemplateId };
+        var prefs = new
+        {
+            templateId = _selectedTemplateId,
+            joiningStyle = _selectedJoiningStyle.ToString()
+        };
         var json = JsonSerializer.Serialize(prefs);
         await JS.InvokeVoidAsync("localStorage.setItem", "name-on-preferences", json);
     }
@@ -135,16 +172,22 @@
                 return;
 
             using var doc = JsonDocument.Parse(json);
+
             if (doc.RootElement.TryGetProperty("templateId", out var templateIdEl))
             {
                 var templateId = templateIdEl.GetString();
                 var template = FormatTemplate.All.FirstOrDefault(t => t.Id == templateId);
                 if (template != null)
-                {
                     _selectedTemplateId = template.Id;
-                    RebuildOptions();
-                }
             }
+
+            if (doc.RootElement.TryGetProperty("joiningStyle", out var joiningStyleEl))
+            {
+                if (System.Enum.TryParse<JoiningStyle>(joiningStyleEl.GetString(), out var style))
+                    _selectedJoiningStyle = style;
+            }
+
+            RebuildOptions();
         }
         catch
         {
