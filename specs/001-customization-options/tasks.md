@@ -186,12 +186,12 @@
 
 **Purpose**: Features that span multiple user stories and final validation
 
-- [ ] T069 Add a "Reset to Defaults" button in the customization panel in name-on-blazor/NameOn.razor that sets `_options = NameOptions.Default`, removes `"name-on-preferences"` from localStorage, and regenerates a name (FR-008)
-- [ ] T070 Verify keyboard accessibility: confirm all customization controls in name-on-blazor/NameOn.razor are tab-navigable and operable via Enter/Space (NFR-001)
-- [ ] T071 Verify responsive layout: confirm the customization panel in name-on-blazor/NameOn.razor renders correctly at 320px viewport width using Bootstrap responsive utilities (NFR-002)
-- [ ] T072 Write backward compatibility test in name-on-unit-tests/NameOptionsTests.cs: verify `new Namer().Gen()` produces output matching regex `^[a-zA-Z]+-[a-zA-Z]+-\d+$` (FR-013)
-- [ ] T073 Run full test suite with `dotnet test` in name-on-unit-tests/ and confirm all tests pass (Constitution quality gate 1)
-- [ ] T074 Run `dotnet publish -c Release` in name-on-blazor/ and confirm static site builds successfully (Constitution quality gate 2)
+- [x] T069 Add a "Reset to Defaults" button in the customization panel in name-on-blazor/NameOn.razor that sets `_options = NameOptions.Default`, removes `"name-on-preferences"` from localStorage, and regenerates a name (FR-008)
+- [x] T070 Verify keyboard accessibility: confirm all customization controls in name-on-blazor/NameOn.razor are tab-navigable and operable via Enter/Space (NFR-001)
+- [x] T071 Verify responsive layout: confirm the customization panel in name-on-blazor/NameOn.razor renders correctly at 320px viewport width using Bootstrap responsive utilities (NFR-002)
+- [x] T072 Write backward compatibility test in name-on-unit-tests/NameOptionsTests.cs: verify `new Namer().Gen()` produces output matching regex `^[a-zA-Z]+-[a-zA-Z]+-\d+$` (FR-013)
+- [x] T073 Run full test suite with `dotnet test` in name-on-unit-tests/ and confirm all tests pass (Constitution quality gate 1)
+- [x] T074 Run `dotnet publish -c Release` in name-on-blazor/ and confirm static site builds successfully (Constitution quality gate 2)
 
 ---
 

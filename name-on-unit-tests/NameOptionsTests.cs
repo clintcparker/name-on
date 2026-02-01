@@ -47,5 +47,17 @@ namespace name_on_unit_tests
             Assert.IsTrue(int.TryParse(parts[2], out _),
                 $"Third part '{parts[2]}' should be a number");
         }
+        [TestMethod]
+        public void GenNoArgsMatchesBackwardCompatiblePattern()
+        {
+            var namer = new Namer();
+            var pattern = @"^[a-zA-Z]+-[a-zA-Z]+-\d+$";
+            for (int i = 0; i < 10; i++)
+            {
+                var name = namer.Gen();
+                Assert.IsTrue(Regex.IsMatch(name, pattern),
+                    $"Gen() produced '{name}' which doesn't match backward-compatible pattern {pattern}");
+            }
+        }
     }
 }

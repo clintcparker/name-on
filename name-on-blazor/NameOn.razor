@@ -112,6 +112,11 @@
                         @_poolWarning
                     </div>
                 }
+
+                <hr />
+                <button class="btn btn-outline-danger btn-sm btn-block" @onclick="ResetToDefaults">
+                    Reset to Defaults
+                </button>
             </div>
         </div>
     }
@@ -216,6 +221,20 @@
         UpdatePoolWarning();
         GenerateName();
         await SavePreferences();
+    }
+
+    private async Task ResetToDefaults()
+    {
+        _selectedTemplateId = FormatTemplate.Default.Id;
+        _selectedJoiningStyle = JoiningStyle.Dash;
+        _selectedMaxValue = 999;
+        _zeroPad = false;
+        _wordMinLength = null;
+        _wordMaxLength = null;
+        _poolWarning = null;
+        _options = NameOptions.Default;
+        GenerateName();
+        await JS.InvokeVoidAsync("localStorage.removeItem", "name-on-preferences");
     }
 
     private void UpdatePoolWarning()
