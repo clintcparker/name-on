@@ -1,22 +1,21 @@
 <!--
 Sync Impact Report
 ==================
-Version change: N/A (template) → 1.0.0 (initial ratification)
-Modified principles: N/A (initial creation)
-Added sections:
-  - Core Principles (5): Client-Side First, Portable Core Library,
-    Test-First, Static Deployment, Simplicity
-  - Technical Constraints
-  - Development Workflow
-  - Governance
-Removed sections: None
+Version change: 1.0.0 → 1.1.0
+Modified principles:
+  - V. Simplicity: Expanded allowed project structure to include CLI
+    and CLI test projects alongside existing three projects.
+Modified sections:
+  - Technical Constraints: Added CLI distribution channels and
+    release workflow references.
+  - Development Workflow: Extended TDD scope to cover CLI projects.
+Rationale: The name-on-core library was designed for reuse across
+  frontends (Principle II rationale). Adding a CLI frontend fulfills
+  this design goal without modifying the core library.
 Templates requiring updates:
   - .specify/templates/plan-template.md ✅ no updates needed
-    (Constitution Check section is generic, will be filled per-feature)
   - .specify/templates/spec-template.md ✅ no updates needed
-    (spec template is requirements-focused, no principle conflicts)
   - .specify/templates/tasks-template.md ✅ no updates needed
-    (task template already supports test-first workflow)
   - .specify/templates/agent-file-template.md ✅ no updates needed
   - .specify/templates/checklist-template.md ✅ no updates needed
 Follow-up TODOs: None
@@ -70,6 +69,9 @@ Refactor cycle MUST be followed.
 - All existing tests MUST pass before a PR can be merged.
 - UI-only changes in `name-on-blazor` are exempt from TDD but MUST
   NOT break existing tests.
+- Changes to `name-on-cli` MUST include corresponding tests in
+  `name-on-cli-tests`. TDD is strongly encouraged but not mandatory
+  for CLI argument parsing and output formatting.
 
 **Rationale**: The core library's correctness (uniqueness guarantees,
 format compliance, dictionary integrity) is critical. TDD enforces
@@ -99,9 +101,9 @@ features and premature abstractions are prohibited.
 - YAGNI: Do not build functionality until it is needed.
 - Prefer inline solutions over new abstractions when the abstraction
   would serve only one call site.
-- The three-project structure (`name-on-core`, `name-on-blazor`,
-  `name-on-unit-tests`) MUST NOT grow without explicit constitution
-  amendment.
+- The project structure (`name-on-core`, `name-on-blazor`,
+  `name-on-unit-tests`, `name-on-cli`, `name-on-cli-tests`) MUST NOT
+  grow without explicit constitution amendment.
 - Dependencies MUST be justified; avoid adding NuGet packages when
   the .NET standard library suffices.
 
@@ -113,8 +115,11 @@ maintainability disproportionately in small projects.
 - **Target Framework**: .NET 8.0 (all projects).
 - **SDK**: Version pinned in `global.json`.
 - **Test Framework**: MSTest.
-- **CI/CD**: GitHub Actions deploying to Azure Static Web Apps.
+- **CI/CD**: GitHub Actions deploying to Azure Static Web Apps (Blazor)
+  and GitHub Releases + NuGet (CLI).
 - **Frontend**: Blazor WebAssembly (standalone, no server project).
+- **CLI**: .NET console application distributed as a .NET global tool
+  (NuGet), self-contained binaries (GitHub Releases), and Homebrew.
 - **Styling**: Bootstrap via CDN; no CSS preprocessors required.
 - **Package Manager**: NuGet only; no npm/node dependencies.
 
@@ -166,4 +171,4 @@ and any other document, the constitution takes precedence.
   project's architecture materially changes (e.g., new target
   platform, new project added to the solution).
 
-**Version**: 1.0.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-02-01
+**Version**: 1.1.0 | **Ratified**: 2026-02-01 | **Last Amended**: 2026-02-01

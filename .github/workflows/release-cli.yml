@@ -1,0 +1,118 @@
+name: Release CLI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - name: Run tests
+        run: dotnet test --configuration Release
+
+  build:
+    needs: test
+    strategy:
+      matrix:
+        include:
+          - rid: linux-x64
+            os: ubuntu-latest
+            artifact: name-on
+          - rid: linux-arm64
+            os: ubuntu-latest
+            artifact: name-on
+          - rid: osx-x64
+            os: macos-latest
+            artifact: name-on
+          - rid: osx-arm64
+            os: macos-latest
+            artifact: name-on
+          - rid: win-x64
+            os: windows-latest
+            artifact: name-on.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish
+        run: >
+          dotnet publish ./name-on-cli/name-on-cli.csproj
+          -c Release
+          -r ${{ matrix.rid }}
+          --self-contained
+          -p:PublishSingleFile=true
+          -p:PublishTrimmed=true
+          -p:TrimMode=partial
+          -o publish
+
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        run: tar -czf name-on-${{ matrix.rid }}.tar.gz -C publish ${{ matrix.artifact }}
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path publish/${{ matrix.artifact }} -DestinationPath name-on-${{ matrix.rid }}.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: name-on-${{ matrix.rid }}
+          path: name-on-${{ matrix.rid }}.*
+
+  nuget:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Pack .NET tool
+        run: dotnet pack ./name-on-cli/name-on-cli.csproj -c Release -o nupkg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package
+          path: nupkg/*.nupkg
+
+  release:
+    needs: [build, nuget]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            artifacts/name-on-linux-x64/*
+            artifacts/name-on-linux-arm64/*
+            artifacts/name-on-osx-x64/*
+            artifacts/name-on-osx-arm64/*
+            artifacts/name-on-win-x64/*
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Push to NuGet
+        run: >
+          dotnet nuget push artifacts/nuget-package/*.nupkg
+          --api-key ${{ secrets.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
