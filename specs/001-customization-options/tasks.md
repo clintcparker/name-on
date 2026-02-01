@@ -159,24 +159,24 @@
 
 ### Tests (Red phase)
 
-- [ ] T057 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `Filter` with `MaxLength: 5` returns only words with 5 or fewer characters from a sample list
-- [ ] T058 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `Filter` with `MinLength: 6` returns only words with 6 or more characters from a sample list
-- [ ] T059 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `Filter` with `MinLength: 4, MaxLength: 7` returns only words between 4 and 7 characters from a sample list
-- [ ] T060 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `IsPoolTooSmall` returns true when filtered list has fewer than 20 entries
-- [ ] T061 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `IsPoolTooSmall` returns false when filtered list has 20 or more entries
-- [ ] T062 [P] [US4] Write test in name-on-unit-tests/NameOptionsTests.cs: verify `Namer.Gen(options)` with `WordFilter(MinLength: 4, MaxLength: 7)` produces names where all words are between 4 and 7 characters
+- [x] T057 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `Filter` with `MaxLength: 5` returns only words with 5 or fewer characters from a sample list
+- [x] T058 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `Filter` with `MinLength: 6` returns only words with 6 or more characters from a sample list
+- [x] T059 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `Filter` with `MinLength: 4, MaxLength: 7` returns only words between 4 and 7 characters from a sample list
+- [x] T060 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `IsPoolTooSmall` returns true when filtered list has fewer than 20 entries
+- [x] T061 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `IsPoolTooSmall` returns false when filtered list has 20 or more entries
+- [x] T062 [P] [US4] Write test in name-on-unit-tests/WordLengthFilterTests.cs: verify `Namer.Gen(options)` with `WordFilter(MinLength: 4, MaxLength: 7)` produces names where all words are between 4 and 7 characters
 
 ### Implementation (Green phase)
 
-- [ ] T063 [US4] Update `Gen(NameOptions)` in name-on-core/Namer.cs to apply `options.WordFilter.Filter()` to the adjective and noun pools before random selection
-- [ ] T064 [US4] Run `dotnet test` in name-on-unit-tests/ and confirm all tests pass
+- [x] T063 [US4] Update `Gen(NameOptions)` in name-on-core/Namer.cs to apply `options.WordFilter.Filter()` to the adjective and noun pools before random selection
+- [x] T064 [US4] Run `dotnet test` in name-on-unit-tests/ and confirm all tests pass
 
 ### Blazor UI
 
-- [ ] T065 [US4] Add min and max word length number inputs in the customization panel in name-on-blazor/NameOn.razor
-- [ ] T066 [US4] Add a warning message element in name-on-blazor/NameOn.razor that displays when `IsPoolTooSmall` returns true for either adjective or noun pool after applying the filter
-- [ ] T067 [US4] Wire word filter to `NameOptions.WordFilter` and persist to localStorage in name-on-blazor/NameOn.razor
-- [ ] T068 [US4] Run `dotnet test` in name-on-unit-tests/ and confirm no existing tests are broken
+- [x] T065 [US4] Add min and max word length number inputs in the customization panel in name-on-blazor/NameOn.razor
+- [x] T066 [US4] Add a warning message element in name-on-blazor/NameOn.razor that displays when `IsPoolTooSmall` returns true for either adjective or noun pool after applying the filter
+- [x] T067 [US4] Wire word filter to `NameOptions.WordFilter` and persist to localStorage in name-on-blazor/NameOn.razor
+- [x] T068 [US4] Run `dotnet test` in name-on-unit-tests/ and confirm no existing tests are broken
 
 **Checkpoint**: User Story 4 complete. Users can set word length limits with restrictive-filter warnings.
 

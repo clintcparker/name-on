@@ -3,6 +3,7 @@
 @using Microsoft.JSInterop
 @using System.Linq
 @using System.Text.Json
+@using System.Collections.Generic
 
 <div class="starter-template" id="uniqueName">
     <h1 id="spinners" style="display:@(IsLoading ? "inline-block" : "none")">
@@ -86,6 +87,31 @@
                         </label>
                     </div>
                 }
+
+                <hr />
+                <h6 class="card-title">Word Length</h6>
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="minLength" class="small">Min length</label>
+                        <input type="number" class="form-control form-control-sm" id="minLength"
+                               min="1" max="20" placeholder="Any"
+                               value="@(_wordMinLength?.ToString() ?? "")"
+                               @onchange="OnMinLengthChanged" />
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="maxLength" class="small">Max length</label>
+                        <input type="number" class="form-control form-control-sm" id="maxLength"
+                               min="1" max="20" placeholder="Any"
+                               value="@(_wordMaxLength?.ToString() ?? "")"
+                               @onchange="OnMaxLengthChanged" />
+                    </div>
+                </div>
+                @if (_poolWarning != null)
+                {
+                    <div class="alert alert-warning small py-1 px-2 mt-1 mb-0">
+                        @_poolWarning
+                    </div>
+                }
             </div>
         </div>
     }
@@ -100,6 +126,9 @@
     private JoiningStyle _selectedJoiningStyle = JoiningStyle.Dash;
     private int _selectedMaxValue = 999;
     private bool _zeroPad = false;
+    private int? _wordMinLength = null;
+    private int? _wordMaxLength = null;
+    private string _poolWarning = null;
     private NameOptions _options = NameOptions.Default;
 
     private static readonly (JoiningStyle Key, string Value)[] _joiningStyles = new[]
@@ -169,6 +198,41 @@
         await SavePreferences();
     }
 
+    private async Task OnMinLengthChanged(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        _wordMinLength = string.IsNullOrWhiteSpace(val) ? null : int.TryParse(val, out var n) ? n : null;
+        RebuildOptions();
+        UpdatePoolWarning();
+        GenerateName();
+        await SavePreferences();
+    }
+
+    private async Task OnMaxLengthChanged(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        _wordMaxLength = string.IsNullOrWhiteSpace(val) ? null : int.TryParse(val, out var n) ? n : null;
+        RebuildOptions();
+        UpdatePoolWarning();
+        GenerateName();
+        await SavePreferences();
+    }
+
+    private void UpdatePoolWarning()
+    {
+        _poolWarning = null;
+        var filter = _options.WordFilter;
+        var filteredAdj = filter.Filter(Namer.Adjectives);
+        var filteredNouns = filter.Filter(Namer.Nouns);
+        var warnings = new List<string>();
+        if (filter.IsPoolTooSmall(filteredAdj))
+            warnings.Add($"Only {filteredAdj.Count} adjectives match (minimum recommended: {WordLengthFilter.MinPoolSize})");
+        if (filter.IsPoolTooSmall(filteredNouns))
+            warnings.Add($"Only {filteredNouns.Count} nouns match (minimum recommended: {WordLengthFilter.MinPoolSize})");
+        if (warnings.Count > 0)
+            _poolWarning = string.Join(" ", warnings);
+    }
+
     private void RebuildOptions()
     {
         var template = FormatTemplate.All.FirstOrDefault(t => t.Id == _selectedTemplateId)
@@ -177,7 +241,7 @@
             template: template,
             joiningStyle: _selectedJoiningStyle,
             numberConfig: new NumberConfig(maxValue: _selectedMaxValue, zeroPad: _zeroPad),
-            wordFilter: _options.WordFilter);
+            wordFilter: new WordLengthFilter(_wordMinLength, _wordMaxLength));
     }
 
     private void GenerateName()
@@ -203,7 +267,9 @@
             templateId = _selectedTemplateId,
             joiningStyle = _selectedJoiningStyle.ToString(),
             numberMaxValue = _selectedMaxValue,
-            numberZeroPad = _zeroPad
+            numberZeroPad = _zeroPad,
+            wordMinLength = _wordMinLength,
+            wordMaxLength = _wordMaxLength
         };
         var json = JsonSerializer.Serialize(prefs);
         await JS.InvokeVoidAsync("localStorage.setItem", "name-on-preferences", json);
@@ -244,7 +310,18 @@
                 _zeroPad = zeroPadEl.GetBoolean();
             }
 
+            if (doc.RootElement.TryGetProperty("wordMinLength", out var minLenEl))
+            {
+                _wordMinLength = minLenEl.ValueKind == JsonValueKind.Null ? null : minLenEl.GetInt32();
+            }
+
+            if (doc.RootElement.TryGetProperty("wordMaxLength", out var maxLenEl))
+            {
+                _wordMaxLength = maxLenEl.ValueKind == JsonValueKind.Null ? null : maxLenEl.GetInt32();
+            }
+
             RebuildOptions();
+            UpdatePoolWarning();
         }
         catch
         {
