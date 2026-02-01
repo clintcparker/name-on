@@ -98,8 +98,8 @@ namespace name_on_core
             return Adjectives[_random.Next(0, Adjectives.Count)];
         }
 
-        internal static List<string> Adjectives;
-        internal static List<string> Nouns;
+        public static List<string> Adjectives;
+        public static List<string> Nouns;
     }
 
     public enum ElementType
