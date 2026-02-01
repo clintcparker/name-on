@@ -80,7 +80,27 @@ namespace name_on_unit_tests
             Debug.WriteLine(name);
             Assert.IsTrue(true);
         }
-        
+
+        [TestMethod]
+        public void GenNoArgsProducesBackwardCompatibleFormat()
+        {
+            var namer = new name_on_core.Namer();
+            var name = namer.Gen();
+            var pattern = @"^[a-zA-Z]+-[a-zA-Z]+-\d+$";
+            var r = new Regex(pattern);
+            Assert.IsTrue(r.IsMatch(name),
+                $"Backward compat: '{name}' doesn't match {pattern}");
+        }
+
+        [TestMethod]
+        public void AdjectivesAndNounsArePubliclyAccessible()
+        {
+            // Verify that Adjectives and Nouns are public static fields
+            Assert.IsNotNull(Namer.Adjectives, "Adjectives should be publicly accessible");
+            Assert.IsNotNull(Namer.Nouns, "Nouns should be publicly accessible");
+            Assert.IsTrue(Namer.Adjectives.Count > 0, "Adjectives list should not be empty");
+            Assert.IsTrue(Namer.Nouns.Count > 0, "Nouns list should not be empty");
+        }
 
     }
 }
