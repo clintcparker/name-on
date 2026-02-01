@@ -92,5 +92,15 @@ namespace name_on_unit_tests
                 $"Backward compat: '{name}' doesn't match {pattern}");
         }
 
+        [TestMethod]
+        public void AdjectivesAndNounsArePubliclyAccessible()
+        {
+            // Verify that Adjectives and Nouns are public static properties/fields
+            Assert.IsNotNull(Namer.Adjectives, "Adjectives should be publicly accessible");
+            Assert.IsNotNull(Namer.Nouns, "Nouns should be publicly accessible");
+            Assert.IsTrue(Namer.Adjectives.Count > 0, "Adjectives list should not be empty");
+            Assert.IsTrue(Namer.Nouns.Count > 0, "Nouns list should not be empty");
+        }
+
     }
 }
