@@ -1,6 +1,8 @@
 @page "/"
 @using name_on_core
 @using Microsoft.JSInterop
+@using System.Linq
+@using System.Text.Json
 
 <div class="starter-template" id="uniqueName">
     <h1 id="spinners" style="display:@(IsLoading ? "inline-block" : "none")">
@@ -22,12 +24,42 @@
             <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
         </svg>
     </button>
+
+    <div class="mt-3">
+        <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleCustomization">
+            @(_showCustomization ? "Hide" : "Show") Options
+        </button>
+    </div>
+
+    @if (_showCustomization)
+    {
+        <div class="card mt-3 mx-auto" style="max-width: 400px; text-align: left;">
+            <div class="card-body">
+                <h6 class="card-title">Name Format</h6>
+                @foreach (var template in FormatTemplate.All)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio"
+                               name="template" id="template-@template.Id"
+                               checked="@(_selectedTemplateId == template.Id)"
+                               @onchange="@(() => SelectTemplate(template))" />
+                        <label class="form-check-label" for="template-@template.Id">
+                            @template.Label
+                        </label>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     private Namer _namer = new();
     private string CurrentName = string.Empty;
     private bool IsLoading = true;
+    private bool _showCustomization = false;
+    private string _selectedTemplateId = FormatTemplate.Default.Id;
+    private NameOptions _options = NameOptions.Default;
 
     [Inject]
     private IJSRuntime JS { get; set; } = default!;
@@ -37,11 +69,45 @@
         GenerateName();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadPreferences();
+            GenerateName();
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleCustomization()
+    {
+        _showCustomization = !_showCustomization;
+    }
+
+    private async Task SelectTemplate(FormatTemplate template)
+    {
+        _selectedTemplateId = template.Id;
+        RebuildOptions();
+        GenerateName();
+        await SavePreferences();
+    }
+
+    private void RebuildOptions()
+    {
+        var template = FormatTemplate.All.FirstOrDefault(t => t.Id == _selectedTemplateId)
+                       ?? FormatTemplate.Default;
+        _options = new NameOptions(
+            template: template,
+            joiningStyle: _options.JoiningStyle,
+            numberConfig: _options.NumberConfig,
+            wordFilter: _options.WordFilter);
+    }
+
     private void GenerateName()
     {
         IsLoading = true;
         StateHasChanged();
-        CurrentName = _namer.Gen();
+        CurrentName = _namer.Gen(_options);
         IsLoading = false;
     }
 
@@ -50,6 +116,39 @@
         if (!string.IsNullOrEmpty(CurrentName))
         {
             await JS.InvokeVoidAsync("navigator.clipboard.writeText", CurrentName);
+        }
+    }
+
+    private async Task SavePreferences()
+    {
+        var prefs = new { templateId = _selectedTemplateId };
+        var json = JsonSerializer.Serialize(prefs);
+        await JS.InvokeVoidAsync("localStorage.setItem", "name-on-preferences", json);
+    }
+
+    private async Task LoadPreferences()
+    {
+        try
+        {
+            var json = await JS.InvokeAsync<string>("localStorage.getItem", "name-on-preferences");
+            if (string.IsNullOrEmpty(json))
+                return;
+
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("templateId", out var templateIdEl))
+            {
+                var templateId = templateIdEl.GetString();
+                var template = FormatTemplate.All.FirstOrDefault(t => t.Id == templateId);
+                if (template != null)
+                {
+                    _selectedTemplateId = template.Id;
+                    RebuildOptions();
+                }
+            }
+        }
+        catch
+        {
+            // localStorage may not be available during prerendering
         }
     }
 }

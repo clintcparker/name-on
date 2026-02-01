@@ -64,25 +64,25 @@
 
 ### Tests (Red phase)
 
-- [ ] T019 [P] [US1] Write test in name-on-unit-tests/FormatTemplateTests.cs: verify all 5 predefined templates exist with correct element arrays (adjective-noun-number, adjective-noun, noun-adjective-number, adjective-adjective-noun, noun-number)
-- [ ] T020 [P] [US1] Write test in name-on-unit-tests/FormatTemplateTests.cs: verify `HasNumber` returns true for templates containing `ElementType.Number` and false otherwise
-- [ ] T021 [P] [US1] Write test in name-on-unit-tests/NameOptionsTests.cs: verify `Namer.Gen(options)` with adjective-noun template produces a name with exactly 2 dash-separated parts (no number)
-- [ ] T022 [P] [US1] Write test in name-on-unit-tests/NameOptionsTests.cs: verify `Namer.Gen(options)` with noun-adjective-number template produces a name where the first part is a valid noun and second is a valid adjective
+- [x] T019 [P] [US1] Write test in name-on-unit-tests/FormatTemplateTests.cs: verify all 5 predefined templates exist with correct element arrays (adjective-noun-number, adjective-noun, noun-adjective-number, adjective-adjective-noun, noun-number)
+- [x] T020 [P] [US1] Write test in name-on-unit-tests/FormatTemplateTests.cs: verify `HasNumber` returns true for templates containing `ElementType.Number` and false otherwise
+- [x] T021 [P] [US1] Write test in name-on-unit-tests/NameOptionsTests.cs: verify `Namer.Gen(options)` with adjective-noun template produces a name with exactly 2 dash-separated parts (no number)
+- [x] T022 [P] [US1] Write test in name-on-unit-tests/NameOptionsTests.cs: verify `Namer.Gen(options)` with noun-adjective-number template produces a name where the first part is a valid noun and second is a valid adjective
 
 ### Implementation (Green phase)
 
-- [ ] T023 [US1] Add all 5 predefined static template properties to name-on-core/FormatTemplate.cs: `AdjectiveNounNumber` (default), `AdjectiveNoun`, `NounAdjectiveNumber`, `AdjectiveAdjectiveNoun`, `NounNumber` per data-model.md
-- [ ] T024 [US1] Add static `All` property to name-on-core/FormatTemplate.cs returning a list of all 5 predefined templates (for UI enumeration)
-- [ ] T025 [US1] Update `Gen(NameOptions)` in name-on-core/Namer.cs to iterate over `options.Template.Elements` instead of hardcoded element types
-- [ ] T026 [US1] Run `dotnet test` in name-on-unit-tests/ and confirm all tests pass
+- [x] T023 [US1] Add all 5 predefined static template properties to name-on-core/FormatTemplate.cs: `AdjectiveNounNumber` (default), `AdjectiveNoun`, `NounAdjectiveNumber`, `AdjectiveAdjectiveNoun`, `NounNumber` per data-model.md
+- [x] T024 [US1] Add static `All` property to name-on-core/FormatTemplate.cs returning a list of all 5 predefined templates (for UI enumeration)
+- [x] T025 [US1] Update `Gen(NameOptions)` in name-on-core/Namer.cs to iterate over `options.Template.Elements` instead of hardcoded element types
+- [x] T026 [US1] Run `dotnet test` in name-on-unit-tests/ and confirm all tests pass
 
 ### Blazor UI
 
-- [ ] T027 [US1] Add a collapsible customization panel to name-on-blazor/NameOn.razor below the generate/copy buttons with a toggle button to show/hide it
-- [ ] T028 [US1] Add a format template radio button group or dropdown in the customization panel in name-on-blazor/NameOn.razor that lists all 5 templates with labels and example output
-- [ ] T029 [US1] Wire template selection to `NameOptions.Template` and pass to `Namer.Gen(options)` in name-on-blazor/NameOn.razor
-- [ ] T030 [US1] Add localStorage persistence for selected template using `IJSRuntime` in name-on-blazor/NameOn.razor: save on change, load on `OnInitializedAsync`
-- [ ] T031 [US1] Run `dotnet test` in name-on-unit-tests/ and confirm no existing tests are broken by UI changes
+- [x] T027 [US1] Add a collapsible customization panel to name-on-blazor/NameOn.razor below the generate/copy buttons with a toggle button to show/hide it
+- [x] T028 [US1] Add a format template radio button group or dropdown in the customization panel in name-on-blazor/NameOn.razor that lists all 5 templates with labels and example output
+- [x] T029 [US1] Wire template selection to `NameOptions.Template` and pass to `Namer.Gen(options)` in name-on-blazor/NameOn.razor
+- [x] T030 [US1] Add localStorage persistence for selected template using `IJSRuntime` in name-on-blazor/NameOn.razor: save on change, load on `OnInitializedAsync`
+- [x] T031 [US1] Run `dotnet test` in name-on-unit-tests/ and confirm no existing tests are broken by UI changes
 
 **Checkpoint**: User Story 1 complete. Users can select format templates, generate matching names, and preferences persist across sessions.
 
