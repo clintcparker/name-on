@@ -95,7 +95,7 @@ namespace name_on_unit_tests
         [TestMethod]
         public void AdjectivesAndNounsArePubliclyAccessible()
         {
-            // Verify that Adjectives and Nouns are public static properties/fields
+            // Verify that Adjectives and Nouns are public static fields
             Assert.IsNotNull(Namer.Adjectives, "Adjectives should be publicly accessible");
             Assert.IsNotNull(Namer.Nouns, "Nouns should be publicly accessible");
             Assert.IsTrue(Namer.Adjectives.Count > 0, "Adjectives list should not be empty");
