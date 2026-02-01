@@ -128,24 +128,24 @@
 
 ### Tests (Red phase)
 
-- [ ] T045 [P] [US3] Write test in name-on-unit-tests/NumberConfigTests.cs: verify `NumberConfig(MaxValue: 99, ZeroPad: false)` generates numbers between 0 and 99 inclusive
-- [ ] T046 [P] [US3] Write test in name-on-unit-tests/NumberConfigTests.cs: verify `NumberConfig(MaxValue: 9999, ZeroPad: false)` generates numbers between 0 and 9999 inclusive
-- [ ] T047 [P] [US3] Write test in name-on-unit-tests/NumberConfigTests.cs: verify `NumberConfig(MaxValue: 999, ZeroPad: true)` formats number 7 as `"007"` (3-digit padding)
-- [ ] T048 [P] [US3] Write test in name-on-unit-tests/NumberConfigTests.cs: verify `NumberConfig(MaxValue: 9999, ZeroPad: true)` formats number 42 as `"0042"` (4-digit padding)
-- [ ] T049 [P] [US3] Write test in name-on-unit-tests/NameOptionsTests.cs: verify `Namer.Gen(options)` with `NumberConfig(MaxValue: 99)` produces a number segment between 0 and 99
+- [x] T045 [P] [US3] Write test in name-on-unit-tests/NumberConfigTests.cs: verify `NumberConfig(MaxValue: 99, ZeroPad: false)` generates numbers between 0 and 99 inclusive
+- [x] T046 [P] [US3] Write test in name-on-unit-tests/NumberConfigTests.cs: verify `NumberConfig(MaxValue: 9999, ZeroPad: false)` generates numbers between 0 and 9999 inclusive
+- [x] T047 [P] [US3] Write test in name-on-unit-tests/NumberConfigTests.cs: verify `NumberConfig(MaxValue: 999, ZeroPad: true)` formats number 7 as `"007"` (3-digit padding)
+- [x] T048 [P] [US3] Write test in name-on-unit-tests/NumberConfigTests.cs: verify `NumberConfig(MaxValue: 9999, ZeroPad: true)` formats number 42 as `"0042"` (4-digit padding)
+- [x] T049 [P] [US3] Write test in name-on-unit-tests/NameOptionsTests.cs: verify `Namer.Gen(options)` with `NumberConfig(MaxValue: 99)` produces a number segment between 0 and 99
 
 ### Implementation (Green phase)
 
-- [ ] T050 [US3] Update `Gen(NameOptions)` in name-on-core/Namer.cs to use `options.NumberConfig.MaxValue` for random number range and `options.NumberConfig.Format(n)` for output formatting instead of hardcoded 0-999
-- [ ] T051 [US3] Run `dotnet test` in name-on-unit-tests/ and confirm all tests pass
+- [x] T050 [US3] Update `Gen(NameOptions)` in name-on-core/Namer.cs to use `options.NumberConfig.MaxValue` for random number range and `options.NumberConfig.Format(n)` for output formatting instead of hardcoded 0-999
+- [x] T051 [US3] Run `dotnet test` in name-on-unit-tests/ and confirm all tests pass
 
 ### Blazor UI
 
-- [ ] T052 [US3] Add a number range dropdown (options: 0-9, 0-99, 0-999, 0-9999) in the customization panel in name-on-blazor/NameOn.razor
-- [ ] T053 [US3] Add a zero-padding toggle checkbox in the customization panel in name-on-blazor/NameOn.razor
-- [ ] T054 [US3] Implement conditional visibility: hide/disable number range and padding controls when `options.Template.HasNumber` is false in name-on-blazor/NameOn.razor
-- [ ] T055 [US3] Wire number config to `NameOptions.NumberConfig` and persist to localStorage in name-on-blazor/NameOn.razor
-- [ ] T056 [US3] Run `dotnet test` in name-on-unit-tests/ and confirm no existing tests are broken
+- [x] T052 [US3] Add a number range dropdown (options: 0-9, 0-99, 0-999, 0-9999) in the customization panel in name-on-blazor/NameOn.razor
+- [x] T053 [US3] Add a zero-padding toggle checkbox in the customization panel in name-on-blazor/NameOn.razor
+- [x] T054 [US3] Implement conditional visibility: hide/disable number range and padding controls when `options.Template.HasNumber` is false in name-on-blazor/NameOn.razor
+- [x] T055 [US3] Wire number config to `NameOptions.NumberConfig` and persist to localStorage in name-on-blazor/NameOn.razor
+- [x] T056 [US3] Run `dotnet test` in name-on-unit-tests/ and confirm no existing tests are broken
 
 **Checkpoint**: User Story 3 complete. Users can configure number range and padding, and controls are contextually shown/hidden.
 

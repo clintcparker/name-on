@@ -63,6 +63,29 @@
                         </label>
                     </div>
                 }
+
+                @if (_options.Template.HasNumber)
+                {
+                    <hr />
+                    <h6 class="card-title">Number Range</h6>
+                    <div class="form-group">
+                        <select class="form-control form-control-sm" value="@_selectedMaxValue"
+                                @onchange="OnMaxValueChanged">
+                            <option value="9">0 - 9</option>
+                            <option value="99">0 - 99</option>
+                            <option value="999">0 - 999</option>
+                            <option value="9999">0 - 9999</option>
+                        </select>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="zeroPad"
+                               checked="@_zeroPad"
+                               @onchange="OnZeroPadChanged" />
+                        <label class="form-check-label" for="zeroPad">
+                            Zero-pad numbers
+                        </label>
+                    </div>
+                }
             </div>
         </div>
     }
@@ -75,6 +98,8 @@
     private bool _showCustomization = false;
     private string _selectedTemplateId = FormatTemplate.Default.Id;
     private JoiningStyle _selectedJoiningStyle = JoiningStyle.Dash;
+    private int _selectedMaxValue = 999;
+    private bool _zeroPad = false;
     private NameOptions _options = NameOptions.Default;
 
     private static readonly (JoiningStyle Key, string Value)[] _joiningStyles = new[]
@@ -125,6 +150,25 @@
         await SavePreferences();
     }
 
+    private async Task OnMaxValueChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var maxValue))
+        {
+            _selectedMaxValue = maxValue;
+            RebuildOptions();
+            GenerateName();
+            await SavePreferences();
+        }
+    }
+
+    private async Task OnZeroPadChanged(ChangeEventArgs e)
+    {
+        _zeroPad = (bool)(e.Value ?? false);
+        RebuildOptions();
+        GenerateName();
+        await SavePreferences();
+    }
+
     private void RebuildOptions()
     {
         var template = FormatTemplate.All.FirstOrDefault(t => t.Id == _selectedTemplateId)
@@ -132,7 +176,7 @@
         _options = new NameOptions(
             template: template,
             joiningStyle: _selectedJoiningStyle,
-            numberConfig: _options.NumberConfig,
+            numberConfig: new NumberConfig(maxValue: _selectedMaxValue, zeroPad: _zeroPad),
             wordFilter: _options.WordFilter);
     }
 
@@ -157,7 +201,9 @@
         var prefs = new
         {
             templateId = _selectedTemplateId,
-            joiningStyle = _selectedJoiningStyle.ToString()
+            joiningStyle = _selectedJoiningStyle.ToString(),
+            numberMaxValue = _selectedMaxValue,
+            numberZeroPad = _zeroPad
         };
         var json = JsonSerializer.Serialize(prefs);
         await JS.InvokeVoidAsync("localStorage.setItem", "name-on-preferences", json);
@@ -185,6 +231,17 @@
             {
                 if (System.Enum.TryParse<JoiningStyle>(joiningStyleEl.GetString(), out var style))
                     _selectedJoiningStyle = style;
+            }
+
+            if (doc.RootElement.TryGetProperty("numberMaxValue", out var maxValueEl))
+            {
+                if (maxValueEl.TryGetInt32(out var maxValue))
+                    _selectedMaxValue = maxValue;
+            }
+
+            if (doc.RootElement.TryGetProperty("numberZeroPad", out var zeroPadEl))
+            {
+                _zeroPad = zeroPadEl.GetBoolean();
             }
 
             RebuildOptions();
