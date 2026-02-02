@@ -234,7 +234,7 @@ namespace name_on_cli_tests
         {
             var result = FormatParser.Parse("adj-noun-num");
             CollectionAssert.AreEqual(
-                new[] { ElementType.Adjective, ElementType.Noun, ElementType.ThreeDigit },
+                new[] { ElementType.Adjective, ElementType.Noun, ElementType.Number },
                 result);
         }
 
@@ -252,7 +252,7 @@ namespace name_on_cli_tests
         {
             var result = FormatParser.Parse("noun-num");
             CollectionAssert.AreEqual(
-                new[] { ElementType.Noun, ElementType.ThreeDigit },
+                new[] { ElementType.Noun, ElementType.Number },
                 result);
         }
 
@@ -261,7 +261,7 @@ namespace name_on_cli_tests
         {
             var result = FormatParser.Parse("noun-adj-num");
             CollectionAssert.AreEqual(
-                new[] { ElementType.Noun, ElementType.Adjective, ElementType.ThreeDigit },
+                new[] { ElementType.Noun, ElementType.Adjective, ElementType.Number },
                 result);
         }
 
@@ -277,7 +277,7 @@ namespace name_on_cli_tests
         {
             var result = FormatParser.Parse("adjective-noun-number");
             CollectionAssert.AreEqual(
-                new[] { ElementType.Adjective, ElementType.Noun, ElementType.ThreeDigit },
+                new[] { ElementType.Adjective, ElementType.Noun, ElementType.Number },
                 result);
         }
 
@@ -286,7 +286,7 @@ namespace name_on_cli_tests
         {
             var result = FormatParser.Parse("noun-noun-num");
             CollectionAssert.AreEqual(
-                new[] { ElementType.Noun, ElementType.Noun, ElementType.ThreeDigit },
+                new[] { ElementType.Noun, ElementType.Noun, ElementType.Number },
                 result);
         }
 
@@ -302,7 +302,7 @@ namespace name_on_cli_tests
         {
             var result = FormatParser.Parse("ADJ-Noun-NUM");
             CollectionAssert.AreEqual(
-                new[] { ElementType.Adjective, ElementType.Noun, ElementType.ThreeDigit },
+                new[] { ElementType.Adjective, ElementType.Noun, ElementType.Number },
                 result);
         }
     }
