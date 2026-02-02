@@ -17,12 +17,12 @@ namespace name_on_core
             Elements = elements;
         }
 
-        public static FormatTemplate Default { get; } = AdjectiveNounNumber;
-
         public static FormatTemplate AdjectiveNounNumber { get; } = new FormatTemplate(
             "adjective-noun-number",
             "Adjective-Noun-Number",
             new[] { ElementType.Adjective, ElementType.Noun, ElementType.Number });
+
+        public static FormatTemplate Default { get; } = AdjectiveNounNumber;
 
         public static FormatTemplate AdjectiveNoun { get; } = new FormatTemplate(
             "adjective-noun",

@@ -106,7 +106,7 @@ namespace name_on_cli
             {
                 "adj" or "adjective" => ElementType.Adjective,
                 "noun" => ElementType.Noun,
-                "num" or "number" => ElementType.ThreeDigit,
+                "num" or "number" => ElementType.Number,
                 _ => throw new ArgumentException($"Unknown format part: '{part}'. Use: adj, noun, num")
             };
         }
