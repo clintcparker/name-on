@@ -4,7 +4,11 @@
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <CommitHash Condition="'$(CommitHash)' == ''">local</CommitHash>
   </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="CommitHash" Value="$(CommitHash)" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../name-on-core/name-on-core.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.0" />
