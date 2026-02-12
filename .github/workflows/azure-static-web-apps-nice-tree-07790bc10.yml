@@ -18,14 +18,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - name: Write commit hash to commit.txt
-        run: echo "${{ github.sha }}" > name-on-blazor/wwwroot/commit.txt
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '9.0.x'
       - name: Publish Blazor WASM
-        run: dotnet publish ./name-on-blazor/name-on-blazor.csproj -c Release -o build_output
+        run: dotnet publish ./name-on-blazor/name-on-blazor.csproj -c Release -o build_output -p:CommitHash=${{ github.sha }}
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
