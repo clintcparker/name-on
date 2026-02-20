@@ -56,6 +56,23 @@ namespace name_on_core
             return _lastReturn;
         }
 
+        public (string name, string[] parts) GenWithParts(NameOptions options)
+        {
+            var filteredAdjectives = options.WordFilter.Filter(Adjectives);
+            var filteredNouns = options.WordFilter.Filter(Nouns);
+
+            var parts = GenerateParts(options, filteredAdjectives, filteredNouns);
+            var retVal = JoiningStyleHelper.Join(options.JoiningStyle, parts);
+
+            while (_lastReturn == retVal)
+            {
+                parts = GenerateParts(options, filteredAdjectives, filteredNouns);
+                retVal = JoiningStyleHelper.Join(options.JoiningStyle, parts);
+            }
+            _lastReturn = retVal;
+            return (retVal, parts);
+        }
+
         private string[] GenerateParts(NameOptions options, List<string> adjectives, List<string> nouns)
         {
             return options.Template.Elements.Select(et => et switch
