@@ -4,6 +4,8 @@ Name-On generates a new _Adjective-Noun-Number_ combo with each request. Useful 
 
 Try it live: [name-on.clintcparker.com](https://name-on.clintcparker.com)
 
+![The Name-On web app generating a new adjective-noun-number combo on each click](docs/images/web-demo.gif)
+
 ---
 
 ## Installation
@@ -38,6 +40,8 @@ No installation needed. Visit [name-on.clintcparker.com](https://name-on.clintcp
 name-on [options]
 ```
 
+![A terminal session running name-on with no arguments, with -n 5, and with custom formats](docs/images/cli-demo.gif)
+
 | Option | Description | Default |
 |---|---|---|
 | `-n, --count <N>` | Generate N names | 1 |
@@ -69,12 +73,18 @@ name-on completions powershell >> $PROFILE
 
 ## Customization Options
 
-Name generation supports several customization options, available in both the web app and CLI:
+The web app exposes the full set of options under **Show Options**. Your choices are saved to
+`localStorage`, so they persist across reloads.
 
 - **Format templates**: `Adjective-Noun-Number` (default), `Adjective-Noun`, `Noun-Adjective-Number`, `Adjective-Adjective-Noun`, `Noun-Number`
-- **Joining styles**: dash (`-`), underscore (`_`), camelCase
-- **Number range**: configurable digit count and max value
-- **Word length filter**: control minimum and maximum word lengths
+- **Joining styles**: dash (`word-word`), underscore (`word_word`), none (`wordword`), `camelCase`, `PascalCase`
+- **Number range**: `0-9`, `0-99`, `0-999` (default), or `0-9999`, with optional zero-padding
+- **Word length filter**: minimum and maximum word length, with a warning when the filter leaves too few words to choose from
+
+![The web app customization panel, showing name format, joining style, number range, and word length controls](docs/images/web-options.png)
+
+The CLI covers a focused subset of these: `--format` for the template and `--separator` for the
+joining character. See [CLI Usage](#cli-usage) above.
 
 ---
 
