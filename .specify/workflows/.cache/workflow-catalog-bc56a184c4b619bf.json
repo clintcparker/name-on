@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-07-29T21:00:00Z",
+  "catalog_url": "https://raw.githubusercontent.com/clintcparker/speckit-addons/main/workflows/catalog.json",
+  "workflows": {
+    "yolo": {
+      "id": "yolo",
+      "name": "Full SDD Cycle - no gates",
+      "description": "Runs specify \u2192 plan \u2192 tasks \u2192 implement without review gates",
+      "author": "clintcparker",
+      "version": "0.1.1",
+      "url": "https://raw.githubusercontent.com/clintcparker/speckit-addons/yolo-v0.1.1/workflows/yolo/workflow.yml",
+      "repository": "https://github.com/clintcparker/speckit-addons",
+      "homepage": "https://github.com/clintcparker/speckit-addons/tree/main/workflows/yolo",
+      "documentation": "https://github.com/clintcparker/speckit-addons/blob/yolo-v0.1.1/workflows/yolo/README.md",
+      "changelog": "https://github.com/clintcparker/speckit-addons/blob/yolo-v0.1.1/workflows/yolo/CHANGELOG.md",
+      "license": "MIT",
+      "requires": {
+        "speckit_version": ">=0.8.12"
+      },
+      "tags": [
+        "sdd",
+        "full-cycle",
+        "no-gates",
+        "automation"
+      ],
+      "created_at": "2026-07-29T00:00:00Z",
+      "updated_at": "2026-07-29T21:00:00Z"
+    }
+  }
+}
