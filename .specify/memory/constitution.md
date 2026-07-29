@@ -112,7 +112,7 @@ maintainability disproportionately in small projects.
 
 ## Technical Constraints
 
-- **Target Framework**: .NET 8.0 (all projects).
+- **Target Framework**: .NET 10.0 (all projects).
 - **SDK**: Version pinned in `global.json`.
 - **Test Framework**: MSTest.
 - **CI/CD**: GitHub Actions deploying to Azure Static Web Apps (Blazor)

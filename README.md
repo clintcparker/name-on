@@ -96,7 +96,7 @@ Name-On is a **Blazor WebAssembly (WASM)** app that runs entirely in the browser
 
 ### Prerequisites
 
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (pinned in `global.json`)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (pinned in `global.json`)
 
 ### Build
 

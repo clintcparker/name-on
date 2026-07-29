@@ -1,5 +1,5 @@
 # Blazor WASM DevContainer with latest stable and preview .NET SDKs, and fish shell
-FROM mcr.microsoft.com/devcontainers/dotnet:1-8.0
+FROM mcr.microsoft.com/devcontainers/dotnet:1-10.0
 
 # Install latest preview .NET SDK
 RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh \

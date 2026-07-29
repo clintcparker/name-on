@@ -21,9 +21,9 @@ jobs:
       - name: Write commit hash to commit.txt
         run: echo "${{ github.sha }}" > name-on-blazor/wwwroot/commit.txt
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
       - name: Publish Blazor WASM
         run: dotnet publish ./name-on-blazor/name-on-blazor.csproj -c Release -o build_output
       - name: Build And Deploy
