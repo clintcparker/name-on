@@ -265,3 +265,5 @@ __pycache__/
 build_output/
 commit.txt
 /docs/TODO
+/.specify/workflows/runs/2e2f64be/
+/.specify/workflows/runs/a7cd867f/

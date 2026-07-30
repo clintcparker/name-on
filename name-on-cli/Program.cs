@@ -173,9 +173,7 @@ namespace name_on_cli
             Console.WriteLine($"name-on {version}");
         }
 
-        private static void PrintHelp()
-        {
-            Console.WriteLine(@"name-on - Generate unique, human-readable names
+        public const string HelpText = @"name-on - Generate unique, human-readable names
 
 Usage: name-on [options]
        name-on completions <shell>
@@ -201,9 +199,14 @@ Examples:
   name-on -f noun-adj-num         Reorder:          otter-clever-123
 
 Install:
-  .NET Tool:  dotnet tool install -g name-on
-  Homebrew:   brew install clintcparker/tap/name-on
-  Script:     curl -fsSL https://name-on.clintcparker.com/install.sh | sh");
+  .NET Tool:   dotnet tool install -g name-on
+  Homebrew:    brew install clintcparker/tap/name-on
+  Script:      curl -fsSL https://name-on.clintcparker.com/install.sh | sh
+  PowerShell:  irm https://name-on.clintcparker.com/install.ps1 | iex";
+
+        private static void PrintHelp()
+        {
+            Console.WriteLine(HelpText);
         }
 
         private static int PrintCompletions(string shell)
