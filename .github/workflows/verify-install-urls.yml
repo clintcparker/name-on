@@ -6,6 +6,14 @@ name: Verify Install URLs
 #
 # Not triggered on `push: main` — that would race the site deploy. This runs after
 # the deploy workflow finishes, plus daily, plus on demand.
+#
+# `workflow_run` fires on EVERY completion of the deploy workflow, including its
+# `pull_request` runs — which build a preview and deploy nothing to production. The
+# PR-close run finishes seconds after a merge, well before the real main deploy, so
+# without the job gate below every merge produced one spurious failure against a
+# site that had not been updated yet. Observed on the 002 merge: the PR-close run
+# finished 01:11:55 and triggered a verify at 01:11:56, while the main deploy ran
+# until 01:13:02.
 
 on:
   workflow_run:
@@ -19,6 +27,13 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     name: Every advertised install URL serves an installer
+    # Only a successful push-to-main deploy means production actually changed.
+    if: >-
+      github.event_name != 'workflow_run' || (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
     steps:
       - uses: actions/checkout@v4
 
@@ -112,18 +127,32 @@ jobs:
 
           exit "$failed"
 
-      - name: Unmatched paths still 404 (no route fallback swallowing typos)
+      - name: Path variants never serve the app's HTML as success
+        # The hazard this guards against is a route fallback answering a typo'd
+        # path with 200 + the SPA's HTML: piping that to a shell runs HTML as a
+        # script. A 404 is the honest answer, and so is the host normalising a
+        # path onto the real installer — Azure Static Web Apps 301s `/install.sh/`
+        # to `/install.sh` because that file now exists (it does the same for
+        # `/index.html/`). Redirects are followed, so what gets asserted is the
+        # response a piped `curl -fsSL` would actually execute.
         run: |
           set -uo pipefail
           failed=0
 
           for path in /Install.sh /install.sh/ /install.txt /does-not-exist-xyz; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "https://name-on.clintcparker.com$path" || echo "000")
-            if [ "$code" != "404" ]; then
-              echo "::error::$path returned HTTP $code (expected 404) — a piped install of a typo'd URL would run HTML as a shell script"
+            url="https://name-on.clintcparker.com$path"
+            code=$(curl -sL -o body.tmp -w '%{http_code}' "$url" || echo "000")
+
+            if [ "$code" = "404" ]; then
+              echo "ok: $path -> 404"
+            elif grep -q 'name-on CLI installer' body.tmp && ! grep -qi '<!DOCTYPE' body.tmp; then
+              echo "ok: $path -> HTTP $code, normalised to the real installer"
+            elif grep -qi '<!DOCTYPE' body.tmp; then
+              echo "::error::$path returned HTTP $code carrying the app's HTML — a route fallback is intercepting it, and a piped install of this typo would run HTML as a shell script"
               failed=1
             else
-              echo "ok: $path -> 404"
+              echo "::error::$path returned HTTP $code serving neither a 404 nor a recognisable installer"
+              failed=1
             fi
           done
 
