@@ -1,0 +1,130 @@
+name: Verify Install URLs
+
+# Every install URL this project advertises must serve a real installer. The URLs
+# are DERIVED from the CLI help output and the README rather than hard-coded here,
+# so adding or changing an advertised URL automatically changes what gets checked.
+#
+# Not triggered on `push: main` — that would race the site deploy. This runs after
+# the deploy workflow finishes, plus daily, plus on demand.
+
+on:
+  workflow_run:
+    workflows: ["Azure Static Web Apps CI/CD"]
+    types: [completed]
+  schedule:
+    - cron: '17 13 * * *'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    name: Every advertised install URL serves an installer
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Derive the advertised install URLs
+        run: |
+          set -euo pipefail
+          {
+            dotnet run --project name-on-cli -- --help
+            cat README.md
+          } | grep -oE 'https://[^ |'"'"'")]*install\.(sh|ps1)' | sort -u > advertised-urls.txt
+
+          echo "Advertised install URLs:"
+          cat advertised-urls.txt
+
+          if [ ! -s advertised-urls.txt ]; then
+            echo "::error::No install URLs found. The scraping pattern no longer matches the help output or README."
+            exit 1
+          fi
+
+      - name: Every advertised URL serves a readable installer
+        run: |
+          set -uo pipefail
+          failed=0
+
+          while read -r url; do
+            echo "--- $url"
+            bad=0
+
+            # One request supplies both the status and the content type, so the
+            # headers always describe the body that was actually checked.
+            read -r code ctype <<<"$(curl -sSL -o body.tmp -w '%{http_code} %{content_type}' "$url" || echo '000 -')"
+
+            if [ "$code" != "200" ]; then
+              echo "::error::$url returned HTTP $code (expected 200)"
+              failed=1
+              continue
+            fi
+
+            case "$ctype" in
+              text/*) ;;
+              *)
+                echo "::error::$url served Content-Type '$ctype' (expected text/*) — it would download instead of rendering"
+                bad=1
+                ;;
+            esac
+
+            if grep -qi '<!DOCTYPE' body.tmp; then
+              echo "::error::$url served HTML, not an installer — a route fallback is probably intercepting the path"
+              bad=1
+            fi
+
+            if ! grep -q 'clintcparker/name-on' body.tmp; then
+              echo "::error::$url body does not reference clintcparker/name-on — not this project's installer"
+              bad=1
+            fi
+
+            if ! grep -q 'name-on CLI installer' body.tmp; then
+              echo "::error::$url body has no 'name-on CLI installer' header line"
+              bad=1
+            fi
+
+            if [ "$bad" -eq 0 ]; then
+              echo "ok: HTTP 200, $ctype, installer body confirmed"
+            else
+              failed=1
+            fi
+          done < advertised-urls.txt
+
+          exit "$failed"
+
+      - name: The deployed site serves the canonical installers byte-for-byte
+        run: |
+          set -uo pipefail
+          failed=0
+
+          for script in install.sh install.ps1; do
+            url="https://name-on.clintcparker.com/$script"
+            echo "--- $url vs install/$script"
+            if ! curl -fsSL "$url" | diff "install/$script" -; then
+              echo "::error::$url is not byte-identical to install/$script"
+              failed=1
+            else
+              echo "ok: byte-identical"
+            fi
+          done
+
+          exit "$failed"
+
+      - name: Unmatched paths still 404 (no route fallback swallowing typos)
+        run: |
+          set -uo pipefail
+          failed=0
+
+          for path in /Install.sh /install.sh/ /install.txt /does-not-exist-xyz; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://name-on.clintcparker.com$path" || echo "000")
+            if [ "$code" != "404" ]; then
+              echo "::error::$path returned HTTP $code (expected 404) — a piped install of a typo'd URL would run HTML as a shell script"
+              failed=1
+            else
+              echo "ok: $path -> 404"
+            fi
+          done
+
+          exit "$failed"

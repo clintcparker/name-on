@@ -10,4 +10,18 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.8" PrivateAssets="all" />
   </ItemGroup>
+  <!--
+    Publish the canonical installers from install/ to the site root so the short
+    URLs the CLI advertises resolve. Referenced, not copied: install/ stays the
+    single authoritative location for each script.
+
+    These land in the *published* wwwroot. The `dotnet run` dev server resolves
+    static web assets against the source wwwroot/ folder, where these files
+    deliberately do not exist, so it serves them as an empty 200. Verify them
+    against `dotnet publish` output or the deployed site, not the dev server.
+  -->
+  <ItemGroup>
+    <Content Include="../install/install.sh" Link="wwwroot/install.sh" />
+    <Content Include="../install/install.ps1" Link="wwwroot/install.ps1" />
+  </ItemGroup>
 </Project>

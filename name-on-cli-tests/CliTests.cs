@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using name_on_cli;
 using name_on_core;
@@ -304,6 +306,75 @@ namespace name_on_cli_tests
             CollectionAssert.AreEqual(
                 new[] { ElementType.Adjective, ElementType.Noun, ElementType.Number },
                 result);
+        }
+    }
+
+    /// <summary>
+    /// Pins the install channels the help output advertises, per
+    /// specs/002-publish-install-scripts/contracts/cli-help-install-section.md.
+    /// Every advertised URL has to resolve to a working installer, so the exact
+    /// strings are asserted rather than merely "an install section exists".
+    /// </summary>
+    [TestClass]
+    public class InstallAdvertisementTests
+    {
+        [TestMethod]
+        public void AdvertisesShellOneLiner()
+        {
+            StringAssert.Contains(
+                Program.HelpText,
+                "curl -fsSL https://name-on.clintcparker.com/install.sh | sh");
+        }
+
+        [TestMethod]
+        public void AdvertisesDotnetToolChannel()
+        {
+            StringAssert.Contains(Program.HelpText, "dotnet tool install -g name-on");
+        }
+
+        [TestMethod]
+        public void AdvertisesHomebrewChannel()
+        {
+            StringAssert.Contains(Program.HelpText, "brew install clintcparker/tap/name-on");
+        }
+
+        [TestMethod]
+        public void AdvertisesPowerShellOneLiner()
+        {
+            StringAssert.Contains(
+                Program.HelpText,
+                "irm https://name-on.clintcparker.com/install.ps1 | iex");
+        }
+
+        [TestMethod]
+        public void AdvertisesNoRawGithubUrl()
+        {
+            // The help output uses the short site URLs; the README owns the long form.
+            Assert.IsFalse(
+                Program.HelpText.Contains("raw.githubusercontent.com"),
+                "Help output must not advertise raw.githubusercontent.com URLs.");
+        }
+
+        [TestMethod]
+        public void OnlySiteUrlsAdvertisedAreTheTwoInstallers()
+        {
+            // Guards against re-introducing a dead site URL: every
+            // name-on.clintcparker.com URL in the help text must be one that the
+            // published site actually serves.
+            var urls = Regex.Matches(Program.HelpText, @"https://name-on\.clintcparker\.com/\S*")
+                .Select(m => m.Value)
+                .Distinct()
+                .OrderBy(u => u, StringComparer.Ordinal)
+                .ToArray();
+
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    "https://name-on.clintcparker.com/install.ps1",
+                    "https://name-on.clintcparker.com/install.sh"
+                },
+                urls,
+                "Unexpected site URL in help output: " + string.Join(", ", urls));
         }
     }
 }
