@@ -1,0 +1,44 @@
+schema_version: '1.0'
+workflow:
+  id: yolo
+  name: Full SDD Cycle - no gates
+  version: 0.1.1
+  author: clintcparker
+  description: "Runs specify \u2192 plan \u2192 tasks \u2192 implement without review\
+    \ gates"
+requires:
+  speckit_version: '>=0.8.12'
+  integrations:
+    any:
+    - claude
+inputs:
+  spec:
+    type: string
+    required: true
+    prompt: Describe what you want to build
+  integration:
+    type: string
+    default: auto
+    prompt: Integration to use (e.g. claude, copilot, gemini; 'auto' uses the project's
+      initialized integration)
+steps:
+- id: specify
+  command: speckit.specify
+  integration: '{{ inputs.integration }}'
+  input:
+    args: '{{ inputs.spec }}'
+- id: plan
+  command: speckit.plan
+  integration: '{{ inputs.integration }}'
+  input:
+    args: '{{ inputs.spec }}'
+- id: tasks
+  command: speckit.tasks
+  integration: '{{ inputs.integration }}'
+  input:
+    args: '{{ inputs.spec }}'
+- id: implement
+  command: speckit.implement
+  integration: '{{ inputs.integration }}'
+  input:
+    args: '{{ inputs.spec }}'
