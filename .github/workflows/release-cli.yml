@@ -24,16 +24,14 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Releasing name-on $VERSION (tag $GITHUB_REF_NAME)"
 
+      # NuGet publishing uses Trusted Publishing (OIDC), which has no secret to
+      # probe here — a missing/inactive nuget.org policy surfaces in the
+      # publish-nuget job's "NuGet login" step instead.
       - name: Check one-time setup
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
           TAP_PUSH_TOKEN: ${{ secrets.TAP_PUSH_TOKEN }}
         run: |
           missing=0
-          if [ -z "$NUGET_API_KEY" ]; then
-            echo "::error::one-time setup missing: NUGET_API_KEY (see docs/how-to/release.md)"
-            missing=1
-          fi
           if [ -z "$TAP_PUSH_TOKEN" ]; then
             echo "::error::one-time setup missing: TAP_PUSH_TOKEN (see docs/how-to/release.md)"
             missing=1
@@ -144,9 +142,14 @@ jobs:
             artifacts/name-on-win-x64/*
 
   # Separate job so a NuGet failure is independently visible in the run summary.
+  # Publishes via Trusted Publishing: the login step trades this job's GitHub
+  # OIDC token for a 1-hour nuget.org API key, so no long-lived secret exists.
   publish-nuget:
     needs: release
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -157,10 +160,16 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: NuGet login (OIDC → temp API key)
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: clintcparker
+
       - name: Push to NuGet
         run: >
           dotnet nuget push nupkg/*.nupkg
-          --api-key ${{ secrets.NUGET_API_KEY }}
+          --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
 

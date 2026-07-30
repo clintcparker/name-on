@@ -30,13 +30,22 @@ The release workflow's `preflight` job fails within seconds — naming the
 missing piece — until all of the following exist. None of these recur per
 release.
 
-1. **`NUGET_API_KEY` repository secret** (on `clintcparker/name-on`):
-   a nuget.org API key with *Push* scope, glob-scoped to the package
-   `name-on`. Create at <https://www.nuget.org/account/apikeys>, then:
+1. **nuget.org Trusted Publisher policy** (no API key, no repository secret):
+   the workflow authenticates to nuget.org with a short-lived GitHub OIDC
+   token via `NuGet/login`. Create the policy at
+   <https://www.nuget.org/account/trustedpublishing> under the
+   `clintcparker` account with:
 
-   ```sh
-   gh secret set NUGET_API_KEY --repo clintcparker/name-on
-   ```
+   - **Repository Owner:** `clintcparker`
+   - **Repository:** `name-on`
+   - **Workflow File:** `release-cli.yml` (file name only, no path)
+   - **Environment:** leave empty
+
+   A brand-new policy may show as *temporarily active* for 7 days; it becomes
+   permanently active after the first successful publish, so create (or
+   re-enable) it shortly before releasing. Because there is no secret,
+   `preflight` cannot check this — a missing or inactive policy fails the
+   `publish-nuget` job at its "NuGet login" step.
 
 2. **Public tap repository `clintcparker/homebrew-tap`**: a README is enough;
    `Formula/name-on.rb` is written only by release automation (never edit it
