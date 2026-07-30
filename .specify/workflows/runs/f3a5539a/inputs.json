@@ -1,0 +1,6 @@
+{
+  "inputs": {
+    "spec": "fix the issues from docs/TODO",
+    "integration": "claude"
+  }
+}

@@ -1,0 +1,113 @@
+name: Verify Install Channels
+
+# Detects broken or partially published install channels (FR-006):
+# every check compares against the SAME latest v* release, so one channel
+# lagging another fails the run by construction. Distinct from
+# verify-install-urls.yml (002), which verifies the advertised script URLs
+# are served — that workflow is deliberately untouched.
+
+on:
+  schedule:
+    - cron: '23 9 * * *'
+  workflow_run:
+    workflows: ["Release CLI"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve latest v* release
+        id: latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 100 \
+            --json tagName -q '[.[].tagName | select(test("^v[0-9]"))][0]')
+          if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
+            echo "::error::no v* release exists — the CLI has never been released (see docs/how-to/release.md)"
+            exit 1
+          fi
+          L="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$L" >> "$GITHUB_OUTPUT"
+          echo "Latest v* release: $TAG (version $L)"
+
+      - name: Release assets exist (5/5)
+        env:
+          TAG: ${{ steps.latest.outputs.tag }}
+        run: |
+          fail=0
+          for asset in name-on-linux-x64.tar.gz name-on-linux-arm64.tar.gz \
+                       name-on-osx-x64.tar.gz name-on-osx-arm64.tar.gz \
+                       name-on-win-x64.zip; do
+            url="https://github.com/clintcparker/name-on/releases/download/${TAG}/${asset}"
+            if curl -sfIL -o /dev/null "$url"; then
+              echo "OK   $asset"
+            else
+              echo "::error::missing release asset: $url"
+              fail=1
+            fi
+          done
+          exit $fail
+
+      - name: NuGet lists the version
+        env:
+          L: ${{ steps.latest.outputs.version }}
+        run: |
+          # Post-release path only: bounded retry (<= ~15 min) to absorb
+          # NuGet indexing lag. Cron and manual runs check once — a version
+          # still unindexed a day later is drift, not lag.
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            attempts=30; delay=30
+          else
+            attempts=1; delay=0
+          fi
+          for i in $(seq 1 $attempts); do
+            if curl -fsSL "https://api.nuget.org/v3-flatcontainer/name-on/index.json" \
+                | jq -e --arg v "$L" '.versions | index($v)' > /dev/null; then
+              echo "OK   nuget.org lists $L"
+              exit 0
+            fi
+            [ "$i" -lt "$attempts" ] && sleep "$delay"
+          done
+          echo "::error::nuget.org flatcontainer index does not list version $L"
+          exit 1
+
+      - name: Tap formula matches the version
+        env:
+          L: ${{ steps.latest.outputs.version }}
+        run: |
+          formula=$(curl -fsSL "https://raw.githubusercontent.com/clintcparker/homebrew-tap/main/Formula/name-on.rb") || {
+            echo "::error::could not fetch Formula/name-on.rb from clintcparker/homebrew-tap"
+            exit 1
+          }
+          if echo "$formula" | grep -qF "version \"$L\""; then
+            echo "OK   tap formula is at $L"
+          else
+            echo "::error::tap formula does not contain: version \"$L\""
+            exit 1
+          fi
+
+      - uses: actions/setup-dotnet@v4
+        if: github.event_name == 'workflow_run'
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: End-to-end dotnet tool install (post-release only)
+        if: github.event_name == 'workflow_run'
+        env:
+          L: ${{ steps.latest.outputs.version }}
+        run: |
+          dotnet tool install -g name-on --version "$L"
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          out=$(name-on --version)
+          echo "name-on --version → $out"
+          case "$out" in
+            *"$L"*) echo "OK   installed tool reports $L" ;;
+            *) echo "::error::installed tool reports '$out', expected version $L"; exit 1 ;;
+          esac

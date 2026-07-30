@@ -9,7 +9,37 @@ permissions:
   contents: write
 
 jobs:
+  # Fails in seconds when one-time setup is missing (see docs/how-to/release.md),
+  # and derives the release version from the tag — the single source of truth
+  # for binaries, the NuGet package, and the Homebrew formula.
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Derive version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing name-on $VERSION (tag $GITHUB_REF_NAME)"
+
+      # NuGet publishing uses Trusted Publishing (OIDC), which has no secret to
+      # probe here — a missing/inactive nuget.org policy surfaces in the
+      # publish-nuget job's "NuGet login" step instead.
+      - name: Check one-time setup
+        env:
+          TAP_PUSH_TOKEN: ${{ secrets.TAP_PUSH_TOKEN }}
+        run: |
+          missing=0
+          if [ -z "$TAP_PUSH_TOKEN" ]; then
+            echo "::error::one-time setup missing: TAP_PUSH_TOKEN (see docs/how-to/release.md)"
+            missing=1
+          fi
+          exit $missing
+
   test:
+    needs: preflight
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +50,7 @@ jobs:
         run: dotnet test --configuration Release
 
   build:
-    needs: test
+    needs: [preflight, test]
     strategy:
       matrix:
         include:
@@ -55,6 +85,7 @@ jobs:
           -p:PublishSingleFile=true
           -p:PublishTrimmed=true
           -p:TrimMode=partial
+          -p:Version=${{ needs.preflight.outputs.version }}
           -o publish
 
       - name: Package (Unix)
@@ -71,7 +102,7 @@ jobs:
           path: name-on-${{ matrix.rid }}.*
 
   nuget:
-    needs: test
+    needs: [preflight, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -80,7 +111,11 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Pack .NET tool
-        run: dotnet pack ./name-on-cli/name-on-cli.csproj -c Release -o nupkg
+        run: >
+          dotnet pack ./name-on-cli/name-on-cli.csproj
+          -c Release
+          -p:Version=${{ needs.preflight.outputs.version }}
+          -o nupkg
 
       - uses: actions/upload-artifact@v4
         with:
@@ -106,13 +141,104 @@ jobs:
             artifacts/name-on-osx-arm64/*
             artifacts/name-on-win-x64/*
 
+  # Separate job so a NuGet failure is independently visible in the run summary.
+  # Publishes via Trusted Publishing: the login step trades this job's GitHub
+  # OIDC token for a 1-hour nuget.org API key, so no long-lived secret exists.
+  publish-nuget:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: nuget-package
+          path: nupkg
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
+      - name: NuGet login (OIDC → temp API key)
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: clintcparker
+
       - name: Push to NuGet
         run: >
-          dotnet nuget push artifacts/nuget-package/*.nupkg
-          --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push nupkg/*.nupkg
+          --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
+
+  # Renders install/homebrew/name-on.rb from the assets actually attached to
+  # the GitHub Release and commits it to clintcparker/homebrew-tap.
+  homebrew:
+    needs: [preflight, release]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.preflight.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download release tarballs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir assets
+          for rid in osx-arm64 osx-x64 linux-arm64 linux-x64; do
+            gh release download "v${VERSION}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --pattern "name-on-${rid}.tar.gz" \
+              --dir assets
+          done
+
+      - name: Render formula
+        run: |
+          template=install/homebrew/name-on.rb
+          placeholders="VERSION SHA256_OSX_ARM64 SHA256_OSX_X64 SHA256_LINUX_ARM64 SHA256_LINUX_X64"
+
+          for p in $placeholders; do
+            if ! grep -q "$p" "$template"; then
+              echo "::error::placeholder $p missing from $template — template drifted from render step"
+              exit 1
+            fi
+          done
+
+          sha() { sha256sum "assets/name-on-$1.tar.gz" | cut -d' ' -f1; }
+          mkdir rendered
+          sed \
+            -e "s/SHA256_OSX_ARM64/$(sha osx-arm64)/g" \
+            -e "s/SHA256_OSX_X64/$(sha osx-x64)/g" \
+            -e "s/SHA256_LINUX_ARM64/$(sha linux-arm64)/g" \
+            -e "s/SHA256_LINUX_X64/$(sha linux-x64)/g" \
+            -e "s/VERSION/${VERSION}/g" \
+            "$template" > rendered/name-on.rb
+
+          for p in $placeholders; do
+            if grep -q "$p" rendered/name-on.rb; then
+              echo "::error::placeholder $p survived rendering — refusing to publish a broken formula"
+              exit 1
+            fi
+          done
+          cat rendered/name-on.rb
+
+      - name: Commit formula to tap
+        env:
+          TAP_PUSH_TOKEN: ${{ secrets.TAP_PUSH_TOKEN }}
+        run: |
+          git clone "https://x-access-token:${TAP_PUSH_TOKEN}@github.com/clintcparker/homebrew-tap.git" tap
+          mkdir -p tap/Formula
+          cp rendered/name-on.rb tap/Formula/name-on.rb
+          cd tap
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Formula unchanged — skipping commit (idempotent re-run)"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/name-on.rb
+          git commit -m "name-on ${VERSION}"
+          git push origin HEAD

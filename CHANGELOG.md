@@ -6,6 +6,53 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Working Package-Manager Install Channels — 2026-07-29
+
+Both advertised package-manager commands were broken promises:
+`dotnet tool install -g name-on` failed with "not found in NuGet feeds" and
+`brew install clintcparker/tap/name-on` failed with "Repository not found".
+Root cause: release automation triggered on `v*` tags, but every release ever
+cut was tagged `0.1.7+1`-style, so the pipeline never ran once — no NuGet
+package, no release binaries, no tap repository. This change makes `v*` SemVer
+tags the documented and actual release procedure and completes the pipeline so
+one tag push publishes every channel.
+
+#### Added
+
+- `preflight` job in `.github/workflows/release-cli.yml` — derives the version
+  from the tag and fails within seconds with an explicit
+  `one-time setup missing: <SECRET> (see docs/how-to/release.md)` message when
+  `NUGET_API_KEY` or `TAP_PUSH_TOKEN` is absent, instead of failing late or
+  silently.
+- Homebrew tap publishing: the release workflow renders
+  `install/homebrew/name-on.rb` (new formula template) with the release version
+  and per-platform SHA-256 checksums, and pushes it to
+  `clintcparker/homebrew-tap`.
+- `.github/workflows/verify-install-channels.yml` — daily, post-release, and
+  on-demand drift detection: checks that nuget.org, the tap formula, and the
+  GitHub Release assets all exist and agree on the same version, so a broken or
+  partially published channel pages the maintainer instead of a user.
+- `docs/how-to/release.md` — the release procedure (annotated `v*` tag push)
+  and the one-time setup checklist (NuGet API key, tap push token, tap repo).
+
+#### Changed
+
+- `name-on-cli/name-on-cli.csproj` — removed the hard-coded
+  `<Version>1.0.0</Version>`; release builds now get their version exclusively
+  from the tag via `-p:Version`, so the binary, the NuGet package, and the
+  formula cannot disagree.
+- `.github/workflows/release-cli.yml` — all jobs now flow from `preflight`, and
+  builds/pack receive the tag-derived version.
+
+#### Fixed
+
+- `dotnet tool install -g name-on` will resolve from nuget.org once the first
+  `v*` release is cut.
+- `brew install clintcparker/tap/name-on` will resolve once the tap repo exists
+  and the first release publishes a formula.
+- Releases can no longer silently skip publishing: partial failures are visible
+  in the release run and caught by the channel verification workflow.
+
 ### Working Short Install URLs — 2026-07-29
 
 The install command the CLI printed did not work. `name-on --help` advertised

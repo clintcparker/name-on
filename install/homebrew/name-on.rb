@@ -1,12 +1,12 @@
-# Homebrew formula for name-on
+# Homebrew formula TEMPLATE for name-on — do not copy to the tap by hand.
 # To use: brew install clintcparker/tap/name-on
 #
-# This formula is a template. The release workflow should update
-# VERSION and SHA256 values when publishing a new release.
-# To create the tap repository:
-#   1. Create repo: github.com/clintcparker/homebrew-tap
-#   2. Copy this file to Formula/name-on.rb in that repo
-#   3. Update VERSION and SHA256 hashes for each release
+# The "homebrew" job in .github/workflows/release-cli.yml renders this file on
+# every release: it substitutes the version and per-platform sha256
+# placeholders below (computed from the assets attached to the GitHub Release)
+# and commits the result to clintcparker/homebrew-tap as Formula/name-on.rb.
+# The render step fails the release if any placeholder is missing here or
+# survives into the rendered output.
 
 class NameOn < Formula
   desc "Generate unique, human-readable names (adjective-noun-number)"
