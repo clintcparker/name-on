@@ -43,12 +43,21 @@ jobs:
           global-json-file: global.json
 
       - name: Derive the advertised install URLs
+        # Matches ANY advertised https URL ending in .sh or .ps1 — deliberately not
+        # `install\.(sh|ps1)`. That narrower pattern only saw those two exact
+        # filenames, so an advertised URL renamed to `install-typo.sh` or
+        # `setup.sh` was never derived and therefore never checked: the surface
+        # FR-009 is supposed to protect had a hole in it. Verified by advertising
+        # `/install-typo.sh` and watching the old pattern skip it entirely.
         run: |
           set -euo pipefail
           {
             dotnet run --project name-on-cli -- --help
             cat README.md
-          } | grep -oE 'https://[^ |'"'"'")]*install\.(sh|ps1)' | sort -u > advertised-urls.txt
+          # `|| true` so a no-match grep (exit 1) does not trip `set -e` here — that
+          # killed the step before the diagnostic below could run, turning a
+          # broken-scraper failure into an opaque one. The guard is the error path.
+          } | grep -oE 'https://[^ |'"'"'")]*\.(sh|ps1)' | sort -u > advertised-urls.txt || true
 
           echo "Advertised install URLs:"
           cat advertised-urls.txt
