@@ -153,8 +153,8 @@ post-deploy validations that require the branch to be on `main`.
 > locally against the derived URL set — the two README URLs pass and the two site
 > URLs correctly fail while undeployed, which is FR-009/SC-005 demonstrated.
 
-- [ ] T024 Post-merge: run `specs/002-publish-install-scripts/quickstart.md` §6 against the deployed site — `200` with `text/plain` for both installer URLs, byte-identity via `diff`, browser renders the script without downloading (SC-003), `404` for `/Install.sh`, `/install.sh/`, `/install.txt`, `/does-not-exist-xyz`, and `301` to `https://` for the insecure-scheme request
-- [ ] T025 Post-merge: `gh workflow run verify-install-urls.yml && gh run watch` is green (quickstart §9), then prove it detects a break by advertising a bogus installer URL on a scratch branch and confirming the job fails (FR-009, SC-005)
+- [X] T024 Post-merge: run `specs/002-publish-install-scripts/quickstart.md` §6 against the deployed site — `200` with `text/plain` for both installer URLs, byte-identity via `diff`, browser renders the script without downloading (SC-003), `404` for `/Install.sh`, `/install.sh/`, `/install.txt`, `/does-not-exist-xyz`, and `301` to `https://` for the insecure-scheme request
+- [X] T025 Post-merge: `gh workflow run verify-install-urls.yml && gh run watch` is green (quickstart §9), then prove it detects a break by advertising a bogus installer URL on a scratch branch and confirming the job fails (FR-009, SC-005)
 
 ---
 
@@ -259,3 +259,80 @@ added later without revisiting US1 or US2.
   serving the publish artifact (`python3 -m http.server` over `build_output/wwwroot`),
   which checks the same bytes the deploy action uploads. quickstart §5 was updated
   to document this and to steer away from the dev server.
+
+### Post-merge verification record (T024, T025)
+
+Merged as `2f91c8e` (PR #18) on 2026-07-30; Azure SWA deploy run `30504930349`
+succeeded. Both tasks were then run against production.
+
+**T024 — quickstart §6: PASS, with one contract line corrected.**
+
+| Check | Result |
+|---|---|
+| `/install.sh` | `200`, `text/plain; charset=utf-8`, body starts `#!/bin/sh` / `# name-on CLI installer` |
+| `/install.ps1` | `200`, `text/plain; charset=utf-8`, body starts `# name-on CLI installer for Windows` |
+| Byte-identity vs `install/*` | both `diff`s silent |
+| No `<!DOCTYPE` in either body | confirmed |
+| `/Install.sh`, `/install.txt`, `/does-not-exist-xyz` | `404` |
+| `http://…/install.sh` | `301` → `https://…/install.sh` |
+| `/install.sh/` | **`301` → `/install.sh`, not the `404` this task predicted** |
+
+The reported defect is fixed: the URL the CLI advertises now serves the installer.
+
+**The `/install.sh/` expectation in this task was wrong.** Azure Static Web Apps
+normalises a trailing slash onto the real file *when that file exists* — `/index.html/`
+behaves identically, while `/install.txt/` and `/does-not-exist-xyz/` still `404`.
+The pre-deploy baseline recorded above ("the live site still returns `404` for
+`/install.sh/`") held **only because `install.sh` was not published yet**; publishing
+it activated the normalisation. The spec's actual prohibition (FR-004, edge case 3)
+is a route fallback answering a typo'd path with `200` **plus the app's HTML**,
+because piping that to a shell executes HTML. A `301` onto the genuine installer is
+not that hazard. FR-004 holds; the task's literal expectation did not.
+
+**T025 — verify workflow green, and detection proven. Three workflow defects found
+and fixed in the process** (`6de3b52`, `e46f0e0`):
+
+1. **Wrong assertion.** The path-variant step demanded `404` from `/install.sh/` and
+   failed on the `301`, printing "would run HTML as a shell script" — false. Replaced
+   with a check of the real hazard: follow redirects, accept a `404` or a recognisable
+   installer, fail on HTML or anything unrecognisable.
+2. **Trigger race.** `workflow_run` fires on *every* completion of the deploy
+   workflow, including its `pull_request` runs, which deploy nothing to production.
+   On this merge the PR-close deploy finished at 01:11:55 and triggered a verify at
+   01:11:56 while the real main deploy ran until 01:13:02 — one guaranteed spurious
+   failure per merge (observed: run `30504961793`). Research R8 avoided the
+   `push: main` race but missed this one. Job now gated on a successful
+   push-to-`main` deploy.
+3. **Derivation hole.** The pattern `install\.(sh|ps1)` matched only those two exact
+   filenames, so an advertised URL renamed to `install-typo.sh` or `setup.sh` was
+   never derived and therefore never checked — invisible to the check FR-009 exists
+   to provide. Broadened to any advertised `https` URL ending `.sh`/`.ps1`; verified
+   the clean tree still derives exactly the same four URLs. Related: under
+   `set -euo pipefail` a no-match `grep` killed the step before the
+   "No install URLs found" diagnostic could run, making that guard dead code — also
+   fixed.
+
+Green run after the fixes: `30511858742` — all four derived URLs (2 site + 2 README)
+`200` with `text/plain` and a confirmed installer body, both byte-identity checks
+silent, all path variants acceptable. **SC-002 is therefore measured at 100%, not
+asserted.**
+
+**Break detection (FR-009, SC-005), by break class:**
+
+| Break | Caught by |
+|---|---|
+| Site stops serving the installer | verify workflow — observed for real: pre-deploy runs failed on exactly this |
+| Site serves HTML instead of the script | verify workflow — `<!DOCTYPE` + path-variant steps |
+| Site content drifts from `install/` | verify workflow — byte-identity step |
+| Help text advertises a typo'd site URL | `OnlySiteUrlsAdvertisedAreTheTwoInstallers` (and now the workflow too) |
+| README advertises a renamed URL | the workflow, only after fix 3 above |
+
+Detection was proven by advertising a bogus URL in `Program.HelpText` locally,
+confirming the derivation picks it up and the assertion fails on its `404`, then
+reverting (`dotnet test` back to 81/81). This exercised the real derivation and
+assertion logic without pushing a scratch branch; GitHub Actions execution itself is
+covered by the four production runs.
+
+**Still open — not attributable to this feature**: SC-001 remains unmet because no
+release carries the `name-on-<rid>` binaries (issue #17). An install fetched from
+either the site URL or the README URL still fails at the download step.
