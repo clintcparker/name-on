@@ -59,5 +59,20 @@
         </div>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        window.generateMnemonic = async function (words) {
+            const prompt = `Create a short, memorable 1-2 sentence story using all of these words: ${words.join(', ')}. The story should be whimsical and easy to remember. Return only the story itself, nothing else.`;
+            const response = await puter.ai.chat(prompt);
+            // Normalize response across Puter's supported model formats
+            if (typeof response === 'string') return response;
+            if (response?.message?.content) {
+                const c = response.message.content;
+                if (typeof c === 'string') return c;
+                if (Array.isArray(c)) return c.map(x => x.text ?? x).join('');
+            }
+            return String(response);
+        };
+    </script>
 </body>
 </html>

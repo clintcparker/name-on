@@ -27,6 +27,39 @@
     </button>
 
     <div class="mt-3">
+        @if (_mnemonicLoading)
+        {
+            <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                <span class="sr-only">Generating mnemonic...</span>
+            </div>
+        }
+        else if (_mnemonic != null)
+        {
+            <div class="card mt-2 mx-auto" style="max-width: 500px;">
+                <div class="card-body py-2 px-3 text-left">
+                    <small class="text-muted">Mnemonic</small>
+                    <p class="mb-1">@_mnemonic</p>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="CopyMnemonicToClipboard">
+                        Copy mnemonic
+                    </button>
+                </div>
+            </div>
+        }
+        else if (_mnemonicError != null)
+        {
+            <div class="alert alert-warning small py-1 px-2 mt-2 mx-auto" style="max-width: 500px;">
+                @_mnemonicError
+            </div>
+        }
+        else if (!IsLoading)
+        {
+            <button class="btn btn-outline-secondary btn-sm" @onclick="GenerateMnemonic">
+                Generate mnemonic
+            </button>
+        }
+    </div>
+
+    <div class="mt-3">
         <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleCustomization">
             @(_showCustomization ? "Hide" : "Show") Options
         </button>
@@ -125,8 +158,12 @@
 @code {
     private Namer _namer = new();
     private string CurrentName = string.Empty;
+    private string[] _currentParts = Array.Empty<string>();
     private bool IsLoading = true;
     private bool _showCustomization = false;
+    private string _mnemonic = null;
+    private bool _mnemonicLoading = false;
+    private string _mnemonicError = null;
     private string _selectedTemplateId = FormatTemplate.Default.Id;
     private JoiningStyle _selectedJoiningStyle = JoiningStyle.Dash;
     private int _selectedMaxValue = 999;
@@ -266,9 +303,33 @@
     private void GenerateName()
     {
         IsLoading = true;
+        _mnemonic = null;
+        _mnemonicError = null;
         StateHasChanged();
-        CurrentName = _namer.Gen(_options);
+        var result = _namer.GenWithParts(_options);
+        CurrentName = result.name;
+        _currentParts = result.parts;
         IsLoading = false;
+    }
+
+    private async Task GenerateMnemonic()
+    {
+        _mnemonicLoading = true;
+        _mnemonicError = null;
+        _mnemonic = null;
+        StateHasChanged();
+        try
+        {
+            _mnemonic = await JS.InvokeAsync<string>("generateMnemonic", new object[] { _currentParts });
+        }
+        catch (Exception ex)
+        {
+            _mnemonicError = $"Could not generate mnemonic: {ex.Message}";
+        }
+        finally
+        {
+            _mnemonicLoading = false;
+        }
     }
 
     private async Task CopyToClipboard()
@@ -277,6 +338,12 @@
         {
             await JS.InvokeVoidAsync("navigator.clipboard.writeText", CurrentName);
         }
+    }
+
+    private async Task CopyMnemonicToClipboard()
+    {
+        if (!string.IsNullOrEmpty(_mnemonic))
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", _mnemonic);
     }
 
     private async Task SavePreferences()
