@@ -1,20 +1,11 @@
-using System.Net.Http;
-using System.Threading.Tasks;
+using System.Reflection;
 
 public class CommitHashService
 {
-    private readonly HttpClient _httpClient;
-    public CommitHashService(HttpClient httpClient) => _httpClient = httpClient;
-
-    public async Task<string> GetCommitHashAsync()
+    public string GetCommitHash()
     {
-        try
-        {
-            return (await _httpClient.GetStringAsync("commit.txt")).Trim();
-        }
-        catch
-        {
-            return "unknown";
-        }
+        return typeof(CommitHashService).Assembly
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(a => a.Key == "CommitHash")?.Value ?? "unknown";
     }
 }
